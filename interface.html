@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Agent Coordination & Decision Engine</title>
+
+  <style>
+    /* ── Base ─────────────────────────────────────────────── */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      min-height: 100vh;
+      padding: 30px 16px 60px;
+    }
+
+    /* ── Page wrapper ─────────────────────────────────────── */
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ───────────────────────────────────────────── */
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      letter-spacing: -0.3px;
+    }
+
+    header p {
+      margin-top: 6px;
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    .badge-row {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+      color: #fff;
+    }
+
+    .badge-planner    { background: #4361ee; }
+    .badge-researcher { background: #7209b7; }
+    .badge-decision   { background: #f77f00; }
+    .badge-executor   { background: #06a94d; }
+
+    /* ── Input card ───────────────────────────────────────── */
+    .input-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      margin-bottom: 28px;
+    }
+
+    .input-card label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    textarea {
+      flex: 1;
+      resize: vertical;
+      min-height: 70px;
+      padding: 12px 14px;
+      border: 1.5px solid #d0d5dd;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: #1a1a2e;
+      outline: none;
+      transition: border-color 0.2s;
+      line-height: 1.5;
+    }
+
+    textarea:focus { border-color: #4361ee; }
+
+    textarea::placeholder { color: #aaa; }
+
+    .btn-submit {
+      align-self: flex-end;
+      padding: 12px 24px;
+      background: #4361ee;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+
+    .btn-submit:hover:not(:disabled) { background: #3a56d4; }
+    .btn-submit:active:not(:disabled) { transform: scale(0.98); }
+    .btn-submit:disabled { background: #a0aec0; cursor: not-allowed; }
+
+    /* ── Progress bar ─────────────────────────────────────── */
+    .progress-wrap {
+      display: none;
+      margin-top: 18px;
+    }
+
+    .progress-label {
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    .progress-track {
+      background: #e8eaf6;
+      border-radius: 4px;
+      height: 6px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #4361ee, #7209b7);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    .step-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    .step-dot {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.75rem;
+      color: #aaa;
+      font-weight: 500;
+    }
+
+    .step-dot .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #ddd;
+    }
+
+    .step-dot.active .dot { background: #4361ee; }
+    .step-dot.done   .dot { background: #06a94d; }
+    .step-dot.active      { color: #4361ee; }
+    .step-dot.done        { color: #06a94d; }
+
+    /* ── Error box ────────────────────────────────────────── */
+    .error-box {
+      display: none;
+      background: #fff5f5;
+      border: 1.5px solid #fc8181;
+      border-radius: 8px;
+      padding: 14px 18px;
+      color: #c53030;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+
+    /* ── Results section ──────────────────────────────────── */
+    #results { display: none; }
+
+    .results-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 14px;
+    }
+
+    /* ── Agent cards ──────────────────────────────────────── */
+    .agent-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+      margin-bottom: 18px;
+      overflow: hidden;
+    }
+
+    .agent-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .agent-icon {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .icon-planner    { background: #eef0fd; }
+    .icon-researcher { background: #f3e8ff; }
+    .icon-decision   { background: #fff3e0; }
+    .icon-executor   { background: #e8f5e9; }
+
+    .agent-meta { flex: 1; }
+
+    .agent-name {
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .name-planner    { color: #4361ee; }
+    .name-researcher { color: #7209b7; }
+    .name-decision   { color: #f77f00; }
+    .name-executor   { color: #06a94d; }
+
+    .agent-desc {
+      font-size: 0.78rem;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .chevron {
+      font-size: 0.85rem;
+      color: #aaa;
+      transition: transform 0.25s;
+    }
+
+    .agent-card.open .chevron { transform: rotate(180deg); }
+
+    .agent-body {
+      display: none;
+      padding: 0 20px 20px;
+    }
+
+    .agent-card.open .agent-body { display: block; }
+
+    .agent-output {
+      background: #f8f9ff;
+      border: 1px solid #e8eaf6;
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 0.88rem;
+      line-height: 1.75;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #2d3748;
+    }
+
+    /* Final answer card is always expanded and styled differently */
+    .final-card {
+      border: 2px solid #06a94d;
+    }
+
+    .final-card .agent-body {
+      display: block !important;
+    }
+
+    .final-card .agent-output {
+      background: #f0faf4;
+      border-color: #c3e6cb;
+    }
+
+    /* ── Footer ───────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 0.78rem;
+      color: #bbb;
+    }
+  </style>
+</head>
+
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <h1>🤖 AI Agent Coordination &amp; Decision Engine</h1>
+    <p>Milestone 1 &mdash; Multi-Agent Workflow</p>
+    <div class="badge-row">
+      <span class="badge badge-planner">① Planner</span>
+      <span class="badge badge-researcher">② Researcher</span>
+      <span class="badge badge-decision">③ Decision</span>
+      <span class="badge badge-executor">④ Executor</span>
+    </div>
+  </header>
+
+  <!-- Input card -->
+  <div class="input-card">
+    <label for="queryInput">Enter your question or business problem:</label>
+    <div class="input-row">
+      <textarea
+        id="queryInput"
+        placeholder="e.g. How can a retail company use AI to reduce customer churn?"
+      ></textarea>
+      <button class="btn-submit" id="submitBtn" onclick="runAgents()">
+        Submit
+      </button>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-label" id="progressLabel">Starting agents…</div>
+      <div class="progress-track">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="step-row">
+        <span class="step-dot" id="dot1"><span class="dot"></span>Planner</span>
+        <span class="step-dot" id="dot2"><span class="dot"></span>Researcher</span>
+        <span class="step-dot" id="dot3"><span class="dot"></span>Decision</span>
+        <span class="step-dot" id="dot4"><span class="dot"></span>Executor</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="error-box" id="errorBox"></div>
+
+  <!-- Results -->
+  <div id="results">
+    <p class="results-title">Agent Outputs</p>
+
+    <!-- Planner -->
+    <div class="agent-card open" id="card1">
+      <div class="agent-header" onclick="toggleCard('card1')">
+        <div class="agent-icon icon-planner">📋</div>
+        <div class="agent-meta">
+          <div class="agent-name name-planner">Planner Agent</div>
+          <div class="agent-desc">Breaks the question into a step-by-step plan</div>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="agent-body">
+        <div class="agent-output" id="planOutput">—</div>
+      </div>
+    </div>
+
+    <!-- Researcher -->
+    <div class="agent-card open" id="card2">
+      <div class="agent-header" onclick="toggleCard('card2')">
+        <div class="agent-icon icon-researcher">🔍</div>
+        <div class="agent-meta">
+          <div class="agent-name name-researcher">Researcher Agent</div>
+          <div class="agent-desc">Gathers relevant information for each step</div>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="agent-body">
+        <div class="agent-output" id="researchOutput">—</div>
+      </div>
+    </div>
+
+    <!-- Decision -->
+    <div class="agent-card open" id="card3">
+      <div class="agent-header" onclick="toggleCard('card3')">
+        <div class="agent-icon icon-decision">⚖️</div>
+        <div class="agent-meta">
+          <div class="agent-name name-decision">Decision Agent</div>
+          <div class="agent-desc">Evaluates options and recommends the best solution</div>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="agent-body">
+        <div class="agent-output" id="decisionOutput">—</div>
+      </div>
+    </div>
+
+    <!-- Executor (always open, highlighted) -->
+    <div class="agent-card open final-card" id="card4">
+      <div class="agent-header" onclick="toggleCard('card4')">
+        <div class="agent-icon icon-executor">✅</div>
+        <div class="agent-meta">
+          <div class="agent-name name-executor">Executor Agent — Final Answer</div>
+          <div class="agent-desc">Synthesises everything into a complete response</div>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="agent-body">
+        <div class="agent-output" id="answerOutput">—</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer>
+  AI Agent Coordination &amp; Decision Engine 
+</footer>
+
+
+<script>
+  const API_URL = "http://localhost:8000/ask";
+
+  // Toggle collapse/expand of agent cards
+  function toggleCard(id) {
+    document.getElementById(id).classList.toggle("open");
+  }
+
+  // Animate progress steps
+  function setStep(step) {
+    const labels = [
+      "Running Planner Agent…",
+      "Running Researcher Agent…",
+      "Running Decision Agent…",
+      "Running Executor Agent…",
+      "Done!"
+    ];
+    const pcts = [15, 40, 65, 90, 100];
+
+    document.getElementById("progressLabel").textContent = labels[step - 1] || "Done!";
+    document.getElementById("progressBar").style.width   = pcts[step - 1] + "%";
+
+    for (let i = 1; i <= 4; i++) {
+      const dot = document.getElementById("dot" + i);
+      dot.className = "step-dot";
+      if (i < step)  dot.classList.add("done");
+      if (i === step) dot.classList.add("active");
+    }
+  }
+
+  // Main function — called when Submit is clicked
+  async function runAgents() {
+    const query = document.getElementById("queryInput").value.trim();
+    if (!query) {
+      alert("Please enter a question first.");
+      return;
+    }
+
+    // UI: disable button, show progress, hide old results
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true;
+    btn.textContent = "Running…";
+
+    document.getElementById("progressWrap").style.display = "block";
+    document.getElementById("errorBox").style.display     = "none";
+    document.getElementById("results").style.display      = "none";
+
+    // Animate steps while waiting (the backend processes all at once)
+    setStep(1);
+    const stepTimer = setInterval(() => {
+      const bar = document.getElementById("progressBar");
+      const current = parseFloat(bar.style.width) || 0;
+      // Slowly crawl up to 88% — we'll jump to 100% when done
+      if (current < 88) {
+        bar.style.width = (current + 1) + "%";
+        const label = document.getElementById("progressLabel");
+        if (current < 30) { setStep(1); }
+        else if (current < 55) { setStep(2); }
+        else if (current < 75) { setStep(3); }
+        else { setStep(4); }
+      }
+    }, 400);
+
+    try {
+      const response = await fetch(API_URL, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ query })
+      });
+
+      clearInterval(stepTimer);
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.detail || "Server error.");
+      }
+
+      const data = await response.json();
+
+      // Fill outputs
+      document.getElementById("planOutput").textContent     = data.plan     || "(no output)";
+      document.getElementById("researchOutput").textContent = data.research || "(no output)";
+      document.getElementById("decisionOutput").textContent = data.decision || "(no output)";
+      document.getElementById("answerOutput").textContent   = data.answer   || "(no output)";
+
+      // Finish progress
+      setStep(5);
+      document.getElementById("progressLabel").textContent = "✓ All agents completed";
+      document.getElementById("progressBar").style.width   = "100%";
+
+      // Show results
+      document.getElementById("results").style.display = "block";
+      document.getElementById("results").scrollIntoView({ behavior: "smooth" });
+
+    } catch (err) {
+      clearInterval(stepTimer);
+      const box = document.getElementById("errorBox");
+      box.textContent = "Error: " + err.message;
+      box.style.display = "block";
+
+      document.getElementById("progressWrap").style.display = "none";
+    }
+
+    btn.disabled = false;
+    btn.textContent = "Submit";
+  }
+
+  document.getElementById("queryInput").addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && e.ctrlKey) runAgents();
+  });
+</script>
+</body>
+</html>
