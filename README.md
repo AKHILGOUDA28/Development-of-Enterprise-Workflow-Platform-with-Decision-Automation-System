@@ -1,5 +1,7 @@
 # AI Agent Coordination & Decision Engine
 
+**Version:** Milestone 1 (Final)
+
 This project implements a basic **AI Agent Coordination & Decision Engine** where four specialized AI agents collaborate to process user queries using **LangChain**, **LangGraph**, **FastAPI**, and the **Groq Llama 3.3** model.
 
 ## What has been implemented

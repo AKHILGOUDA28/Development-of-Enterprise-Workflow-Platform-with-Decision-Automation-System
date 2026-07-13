@@ -3,6 +3,8 @@ config.py
 ---------
 Loads environment variables and creates the shared LLM client.
 All other files import 'llm' and 'IS_MOCK' from here.
+
+Milestone 1 (Final)
 """
 
 import os
