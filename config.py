@@ -3,8 +3,6 @@ config.py
 ---------
 Loads environment variables and creates the shared LLM client.
 All other files import 'llm' and 'IS_MOCK' from here.
-
-Milestone 1 (Final)
 """
 
 import os
@@ -16,6 +14,11 @@ load_dotenv()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "").strip()
 MODEL_NAME   = os.getenv("MODEL_NAME", "llama-3.3-70b-versatile")
+
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
+EMAIL_USER = os.getenv("EMAIL_USER", "").strip()
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD", "").strip()
 
 # Check if the key is missing or is still the default placeholder
 IS_MOCK = not GROQ_API_KEY or GROQ_API_KEY.startswith("your_")

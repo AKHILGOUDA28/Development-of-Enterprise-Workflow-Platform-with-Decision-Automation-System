@@ -1,0 +1,177 @@
+[
+  {
+    "issue": "VPN not connecting",
+    "solution": [
+      "Restart VPN service",
+      "Clear DNS cache",
+      "Reconnect VPN"
+    ]
+  },
+  {
+    "issue": "WiFi not working",
+    "solution": [
+      "Restart router",
+      "Forget WiFi network",
+      "Reconnect"
+    ]
+  },
+  {
+    "issue": "Printer offline",
+    "solution": [
+      "Restart printer",
+      "Check USB connection",
+      "Set printer online"
+    ]
+  },
+  {
+    "issue": "Laptop slow",
+    "solution": [
+      "Check Task Manager for high CPU usage",
+      "Close unnecessary applications",
+      "Restart computer",
+      "Run antivirus scan"
+    ]
+  },
+  {
+    "issue": "Password expired",
+    "solution": [
+      "Go to password reset portal",
+      "Enter temporary password",
+      "Create new secure password",
+      "Update password in all apps"
+    ]
+  },
+  {
+    "issue": "Cannot access shared drive",
+    "solution": [
+      "Check if connected to corporate network/VPN",
+      "Remap the network drive",
+      "Verify folder permissions with IT"
+    ]
+  },
+  {
+    "issue": "Email not syncing",
+    "solution": [
+      "Check internet connection",
+      "Restart Outlook/Email client",
+      "Verify server settings",
+      "Re-enter credentials"
+    ]
+  },
+  {
+    "issue": "Blue screen of death",
+    "solution": [
+      "Note the error code",
+      "Restart computer in Safe Mode",
+      "Update device drivers",
+      "Contact IT if it persists"
+    ]
+  },
+  {
+    "issue": "Software installation failed",
+    "solution": [
+      "Run installer as Administrator",
+      "Check disk space",
+      "Temporarily disable antivirus",
+      "Download installer again"
+    ]
+  },
+  {
+    "issue": "Monitor not displaying",
+    "solution": [
+      "Check power cable",
+      "Check display cable (HDMI/DisplayPort)",
+      "Try another port",
+      "Update display drivers"
+    ]
+  },
+  {
+    "issue": "Keyboard not working",
+    "solution": [
+      "Unplug and reconnect USB",
+      "Try a different USB port",
+      "Replace batteries if wireless",
+      "Restart computer"
+    ]
+  },
+  {
+    "issue": "Mouse lagging",
+    "solution": [
+      "Clean optical sensor",
+      "Use mousepad",
+      "Update mouse drivers",
+      "Change USB port"
+    ]
+  },
+  {
+    "issue": "Audio not working",
+    "solution": [
+      "Check volume levels",
+      "Verify correct playback device is selected",
+      "Update audio drivers",
+      "Restart audio service"
+    ]
+  },
+  {
+    "issue": "Microphone not working",
+    "solution": [
+      "Check privacy settings for mic access",
+      "Verify correct recording device is selected",
+      "Test mic in sound settings",
+      "Update audio drivers"
+    ]
+  },
+  {
+    "issue": "Webcam not turning on",
+    "solution": [
+      "Check physical privacy shutter",
+      "Allow camera access in privacy settings",
+      "Update camera drivers",
+      "Restart application using camera"
+    ]
+  },
+  {
+    "issue": "Application crashing",
+    "solution": [
+      "Update application to latest version",
+      "Clear application cache",
+      "Reinstall application",
+      "Check event viewer for error details"
+    ]
+  },
+  {
+    "issue": "File deleted accidentally",
+    "solution": [
+      "Check Recycle Bin",
+      "Check OneDrive/SharePoint version history",
+      "Use File History if enabled",
+      "Contact IT for backup restore"
+    ]
+  },
+  {
+    "issue": "Account locked out",
+    "solution": [
+      "Wait 15 minutes for auto-unlock",
+      "Use self-service password reset",
+      "Contact IT Helpdesk to unlock manually"
+    ]
+  },
+  {
+    "issue": "Unable to print to network printer",
+    "solution": [
+      "Check if printer is on network",
+      "Remove and re-add printer in settings",
+      "Clear print spooler",
+      "Update printer drivers"
+    ]
+  },
+  {
+    "issue": "System update failing",
+    "solution": [
+      "Run Windows Update Troubleshooter",
+      "Clear SoftwareDistribution folder",
+      "Check for adequate disk space",
+      "Download update manually"
+    ]
+  }
+]

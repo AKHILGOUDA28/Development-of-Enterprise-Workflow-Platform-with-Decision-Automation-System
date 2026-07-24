@@ -73,6 +73,9 @@ def run_workflow(query: str) -> dict:
     Returns a dict with:
       query, plan, research, decision, answer
     """
+    from tracing import tracer
+    tracer.start_trace(query)
+
     initial_state = {
         "query":    query,
         "plan":     "",
@@ -82,4 +85,5 @@ def run_workflow(query: str) -> dict:
     }
 
     result = agent_graph.invoke(initial_state)
+    tracer.log_event("Workflow Completed", f"Final Answer Length: {len(result.get('answer', ''))}")
     return result

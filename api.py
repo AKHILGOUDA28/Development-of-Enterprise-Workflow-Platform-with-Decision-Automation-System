@@ -22,6 +22,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
+import sqlite3
+import uuid
 
 from workflow import run_workflow
 
@@ -61,6 +63,7 @@ class AgentResponse(BaseModel):
     decision: str
     answer:   str
     mode:     str
+    trace_logs: list = []
 
 
 # --------------------------------------------------
@@ -97,6 +100,7 @@ def ask(request: QuestionRequest):
 
     try:
         import config
+        from tracing import tracer
         result = run_workflow(request.query)
         run_mode = "Demo/Simulation Mode" if config.IS_MOCK else "Real-time LLM Output"
         return AgentResponse(
@@ -106,12 +110,90 @@ def ask(request: QuestionRequest):
             research = result["research"],
             decision = result["decision"],
             answer   = result["answer"],
-            mode     = run_mode
+            mode     = run_mode,
+            trace_logs = tracer.get_logs()
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# --------------------------------------------------
+# Ticket System Endpoints
+# --------------------------------------------------
+
+class TicketCreate(BaseModel):
+    user: str
+    issue: str
+    priority: str
+
+class TicketUpdate(BaseModel):
+    status: str
+
+def get_db_connection():
+    db_path = os.path.join(os.path.dirname(__file__), "database", "tickets.db")
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    # Ensure table exists
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS tickets (
+            ticket_id TEXT PRIMARY KEY,
+            user TEXT,
+            issue TEXT,
+            priority TEXT,
+            status TEXT
+        )
+    ''')
+    conn.commit()
+    return conn
+
+@app.post("/tickets", tags=["Tickets"])
+def create_ticket(ticket: TicketCreate):
+    conn = get_db_connection()
+    ticket_id = f"INC{str(uuid.uuid4().int)[:5]}"
+    conn.execute(
+        "INSERT INTO tickets (ticket_id, user, issue, priority, status) VALUES (?, ?, ?, ?, ?)",
+        (ticket_id, ticket.user, ticket.issue, ticket.priority, "Open")
+    )
+    conn.commit()
+    conn.close()
+    return {"ticket_id": ticket_id, "message": "Ticket created successfully"}
+
+@app.get("/tickets", tags=["Tickets"])
+def get_all_tickets():
+    conn = get_db_connection()
+    tickets = conn.execute("SELECT * FROM tickets ORDER BY ticket_id DESC").fetchall()
+    conn.close()
+    return [dict(t) for t in tickets]
+
+@app.get("/tickets/{ticket_id}", tags=["Tickets"])
+def get_ticket(ticket_id: str):
+    conn = get_db_connection()
+    ticket = conn.execute("SELECT * FROM tickets WHERE ticket_id = ?", (ticket_id,)).fetchone()
+    conn.close()
+    if ticket is None:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+    return dict(ticket)
+
+@app.put("/tickets/{ticket_id}", tags=["Tickets"])
+def update_ticket(ticket_id: str, ticket_update: TicketUpdate):
+    conn = get_db_connection()
+    cursor = conn.execute("UPDATE tickets SET status = ? WHERE ticket_id = ?", (ticket_update.status, ticket_id))
+    conn.commit()
+    if cursor.rowcount == 0:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Ticket not found")
+    conn.close()
+    return {"message": "Ticket updated successfully"}
+
+@app.get("/knowledge", tags=["Data"])
+def get_knowledge_base():
+    """Returns the JSON knowledge base for the UI."""
+    kb_path = os.path.join(os.path.dirname(__file__), "database", "knowledge_base.json")
+    if not os.path.exists(kb_path):
+        return []
+    import json
+    with open(kb_path, "r") as f:
+        return json.load(f)
 
 # --------------------------------------------------
 # Entry point

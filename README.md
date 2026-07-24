@@ -1,76 +1,78 @@
 # AI Agent Coordination & Decision Engine
 
-**Version:** Milestone 1 (Final)
+This project implements a stateful **AI Agent Coordination & Decision Engine** where four specialized AI agents collaborate to process user queries using **LangChain**, **LangGraph**, **FastAPI**, **Groq (Llama 3.3)**, and external Tools.
 
-This project implements a basic **AI Agent Coordination & Decision Engine** where four specialized AI agents collaborate to process user queries using **LangChain**, **LangGraph**, **FastAPI**, and the **Groq Llama 3.3** model.
+## What has been implemented (Milestone 1 & 2)
 
-## What has been implemented
+- **Agent Foundation**: Created separate cognitive agents (Planner, Researcher, Decision, and Executor) orchestrated sequentially via LangGraph.
+- **Common Tool Interface**: Implemented schema-validated base tools with built-in timeout, retry backoffs, and safe fallbacks (`tools/base_tool.py`).
+- **5 Functional Connectors**:
+  - **Calculator**: Safely evaluates math expressions.
+  - **Weather**: Fetches real-time weather using OpenWeatherMap API.
+  - **Database**: Queries mock enterprise records.
+  - **Email**: Simulates email sending with deliberate SMTP timeout test mode.
+  - **Notification**: Logs system alerts.
+- **Native LLM Tool Calling**: Decision agent dynamically outputs tool call intents in JSON schemas which are parsed, executed, traced, and looped back to the agent for final answer formulation.
+- **Traced Execution**: Fully logs workflow state progression, tool timing metrics, and retry logs (`tracing.py`).
+- **End-to-End Tests**: Full E2E tests validating mathematical precision, schema rejections, timeouts, and fallback workflows (`tests.py`).
 
-- Configured LangChain, LangGraph, and required project dependencies.
-- Configured the Groq LLM using a shared configuration.
-- Created four AI agents:
-  - Planner Agent
-  - Researcher Agent
-  - Decision Agent
-  - Executor Agent
-- Implemented prompt templates for each agent.
-- Established a sequential workflow using LangGraph.
-- Implemented shared state (memory) for agent communication.
-- Developed a FastAPI server with REST API endpoints.
-- Created a basic testing interface using FastAPI Swagger UI.
+## File Structure
 
-## How it works
+```
+project/
+│
+├── .env                ← Configure GROQ_API_KEY and MODEL_NAME
+├── requirements.txt
+│
+├── config.py           ← Configures the shared Groq LLM client
+├── prompts.py          ← System and human prompt templates
+├── memory.py           ← Short-term and long-term memory store
+├── workflow.py         ← LangGraph graph compiler
+├── tracing.py          ← Custom workflow tracer & execution logger
+│
+├── agents/             ← Python agent persona package
+│   ├── __init__.py
+│   ├── planner.py
+│   ├── researcher.py
+│   ├── decision.py
+│   └── executor.py
+│
+├── tools/              ← Schema-validated external tools
+│   ├── __init__.py     ← Registers all tools
+│   ├── base_tool.py    ← Common tool interface with retries and fallbacks
+│   ├── registry.py     ← Central tool registry
+│   ├── calculator.py   ← Arithmetic solver
+│   ├── weather.py      ← Weather API connector
+│   ├── database.py     ← Database record query tool
+│   ├── email.py        ← SMTP simulator
+│   └── notification.py ← System alerts logger
+│
+├── interface.html      ← UI web dashboard showing tracing metrics
+├── api.py              ← FastAPI server serving the UI and ask endpoint
+└── tests.py            ← Unit tests verifying success/failure workflows
+```
 
-**Planner Agent**
-- Understands the user's request.
-- Breaks the request into logical execution steps.
+## Setup & Running
 
-**Researcher Agent**
-- Collects relevant information based on the execution plan.
-- Summarizes useful findings.
+1. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-**Decision Agent**
-- Analyzes the research results.
-- Evaluates possible options.
-- Recommends the best solution.
+2. **Add credentials**:
+   Put your Groq API key in the `.env` file:
+   ```env
+   GROQ_API_KEY=gsk_your_api_key_here
+   MODEL_NAME=llama-3.3-70b-versatile
+   ```
 
-**Executor Agent**
-- Combines the outputs from all previous agents.
-- Generates the final response for the user.
+3. **Run the testing suite**:
+   ```bash
+   python -m unittest tests.py
+   ```
 
-The agents execute sequentially using a **LangGraph workflow**, where the output of one agent becomes the input for the next agent through a shared state.
-
-## Key Features
-
-- Multi-Agent Coordination using LangGraph.
-- Shared LLM configuration using Groq Llama 3.3.
-- Modular AI agent architecture.
-- Shared state for agent communication.
-- FastAPI REST API for interacting with the workflow.
-- Automatic API testing using FastAPI Swagger UI.
-
-## Technologies Used
-
-- Python
-- FastAPI
-- LangChain
-- LangGraph
-- Groq (Llama 3.3)
-- python-dotenv
-
-## How to Run
-
-### Install dependencies
-
-```bash
-pip install -r requirements.txt
-
-Put your Groq API key in the `.env` file:
-
-```env
-GROQ_API_KEY=gsk_your_api_key_here
-MODEL_NAME=llama-3.3-70b-versatile
-
-Start the FastAPI server:
-
-python api.py
+4. **Start the FastAPI server**:
+   ```bash
+   python api.py
+   ```
+   Open **`http://localhost:8000`** in your browser.
