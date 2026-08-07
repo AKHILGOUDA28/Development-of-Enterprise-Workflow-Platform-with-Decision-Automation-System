@@ -5,6 +5,7 @@ Loads environment variables and creates the shared LLM client.
 All other files import 'llm' and 'IS_MOCK' from here.
 """
 
+import uuid_utils_compat  # noqa: F401 — must come before any langchain import
 import os
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq

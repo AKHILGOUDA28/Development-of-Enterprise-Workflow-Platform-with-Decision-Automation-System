@@ -1,7 +1,9 @@
 """
 prompts.py
 ----------
-Prompt templates for the IT Support Multi-Agent System.
+Prompt templates for the AI Agent Coordination & Decision Engine.
+
+Agents: Planner → Researcher → Analysis → Decision → Executor
 """
 
 from langchain_core.prompts import ChatPromptTemplate
@@ -42,6 +44,8 @@ You have access to tools to help you search. If you need to search, output ONLY 
 Available Tools for Research:
 1. knowledge_base: Searches the local knowledge base for troubleshooting steps. Args: {{"query": "..."}}
 2. incident_database: Searches past IT incidents and solutions. Args: {{"query": "..."}}
+3. web_search: Searches the enterprise IT knowledge gateway for technical articles. Args: {{"query": "...", "max_results": 3}}
+4. hr_system: Looks up employee or department information from HR. Args: {{"query": "...", "lookup_type": "employee|department|oncall|manager"}}
 
 Once you have finished researching using the tools (or if no tools are needed), provide your findings in this format:
 
@@ -57,12 +61,49 @@ Key Points:
 
 
 # --------------------------------------------------
+# Analysis Agent Prompt
+# --------------------------------------------------
+analysis_prompt = ChatPromptTemplate.from_messages([
+    ("system", """
+You are an IT Support Analysis Agent.
+Your job is to perform structured root-cause analysis on the research findings.
+Identify patterns, assess severity, evaluate the confidence level, and determine the most likely root cause.
+
+Reply STRICTLY in this format:
+
+Root Cause Analysis:
+<Identify the most likely root cause of the IT issue based on research findings>
+
+Pattern Recognition:
+- <pattern or recurring theme 1>
+- <pattern or recurring theme 2>
+
+Severity Assessment:
+  Level: <Critical | High | Medium | Low>
+  Impact: <Description of business impact>
+
+Confidence Score: <0–100>%
+  Reasoning: <Why this confidence level was assigned>
+
+Recommended Approach:
+  Strategy: <Auto-Fix | Escalate | Monitor>
+  Rationale: <Why this approach is recommended>
+
+Supporting Evidence:
+- <evidence item 1 from research>
+- <evidence item 2 from research>
+"""),
+    ("human", "User Question: {query}\n\nPlan:\n{plan}\n\nResearch Findings:\n{research}"),
+])
+
+
+# --------------------------------------------------
 # Decision Agent Prompt
 # --------------------------------------------------
 decision_prompt = ChatPromptTemplate.from_messages([
     ("system", """
 You are an IT Support Decision Agent.
-Your job is to review the plan and research findings, and decide the next action.
+Your job is to review the plan, research findings, and analysis, and decide the next action.
 You can either auto-fix the issue (by providing a solution), OR escalate by creating a support ticket and sending notifications.
 
 CRITICAL INSTRUCTIONS ON TOOL USE:
@@ -76,6 +117,8 @@ Available Tools for Action:
 1. ticket_system: Creates a new IT support ticket. Args: {{"user": "...", "issue": "...", "priority": "Low|Medium|High"}}
 2. email: Sends an email notification. ALWAYS use the email address provided in the user's details. Args: {{"to": "...", "subject": "...", "body": "..."}}
 3. notification: Sends an in-app system notification. Args: {{"message": "..."}}
+4. calendar_system: Check maintenance windows or schedule work orders. Args: {{"query": "...", "action": "check_availability|maintenance_windows|blackout_dates|schedule_work"}}
+5. weather_service: Check environmental conditions or data center alerts. Args: {{"location": "...", "query_type": "current|forecast|datacenter_env|alerts"}}
 
 Once you have executed the necessary actions (such as ticket creation and email notification) and received their results, or if no actions are needed (auto-fix is possible), provide your final recommendation in this format:
 
@@ -89,7 +132,7 @@ Next Steps:
 1. <step 1>
 2. <step 2>
 """),
-    ("human", "User Question: {query}\n\nPlan:\n{plan}\n\nResearch:\n{research}"),
+    ("human", "User Question: {query}\n\nPlan:\n{plan}\n\nResearch:\n{research}\n\nAnalysis:\n{analysis}"),
 ])
 
 
@@ -100,7 +143,7 @@ executor_prompt = ChatPromptTemplate.from_messages([
     ("system", """
 You are an IT Support Executor Agent.
 Your job is to write the final, professional response for the user facing the IT issue.
-Use the plan, research, and decision to write a complete response. If a ticket was created, prominently display the Ticket ID.
+Use the plan, research, analysis, and decision to write a complete response. If a ticket was created, prominently display the Ticket ID.
 
 Reply in this format:
 
@@ -117,5 +160,5 @@ Steps to Implement:
 Conclusion:
 <Closing summary>
 """),
-    ("human", "User Question: {query}\n\nPlan:\n{plan}\n\nResearch:\n{research}\n\nDecision:\n{decision}"),
+    ("human", "User Question: {query}\n\nPlan:\n{plan}\n\nResearch:\n{research}\n\nAnalysis:\n{analysis}\n\nDecision:\n{decision}"),
 ])
