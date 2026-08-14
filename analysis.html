@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI IT Incident Triage Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #090D16;
+      --bg-card: #111827;
+      --bg-card-hover: #1F2937;
+      --border-color: #1F2937;
+      --border-bright: #374151;
+      --accent-blue: #3B82F6;
+      --accent-cyan: #06B6D4;
+      --accent-indigo: #6366F1;
+      --accent-purple: #8B5CF6;
+      --accent-emerald: #10B981;
+      --accent-amber: #F59E0B;
+      --accent-rose: #EF4444;
+      --text-main: #F9FAFB;
+      --text-muted: #9CA3AF;
+      --text-dim: #6B7280;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(to right, #FFFFFF, #9CA3AF);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .role-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #1E293B;
+      border: 1px solid var(--border-bright);
+      border-radius: 20px;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.85rem;
+    }
+
+    .role-select {
+      background: transparent;
+      border: none;
+      color: var(--accent-cyan);
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      color: var(--accent-emerald);
+      background: rgba(16, 185, 129, 0.1);
+      padding: 0.3rem 0.75rem;
+      border-radius: 20px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-emerald);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-emerald);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      padding: 1.5rem 2rem;
+      max-width: 1600px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Stats Row Header */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-bright);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+
+    .stat-card.blue::before { background: var(--accent-blue); }
+    .stat-card.emerald::before { background: var(--accent-emerald); }
+    .stat-card.amber::before { background: var(--accent-amber); }
+    .stat-card.purple::before { background: var(--accent-purple); }
+    .stat-card.rose::before { background: var(--accent-rose); }
+
+    .stat-title {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-main);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .stat-desc {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-top: 0.3rem;
+    }
+
+    /* Layout Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 1200px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.85rem;
+    }
+
+    .panel-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Input Triage Section */
+    .triage-input-box {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.25rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .select-input, .text-input {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-bright);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: var(--text-main);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .select-input:focus, .text-input:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+
+    .text-input { flex: 1; }
+
+    .btn-submit {
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-indigo));
+      color: white;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Incident Details Card (INC-1025 Layout) */
+    .incident-details-card {
+      background: #0F172A;
+      border: 1px solid var(--border-bright);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .inc-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .inc-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-auto { background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-pending { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-escalated { background: rgba(239, 68, 68, 0.15); color: var(--accent-rose); border: 1px solid rgba(239, 68, 68, 0.3); }
+    .badge-info { background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); border: 1px solid rgba(59, 130, 246, 0.3); }
+
+    .confidence-meter {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 0.25rem;
+    }
+
+    .progress-bar-bg {
+      flex: 1;
+      height: 8px;
+      background: var(--bg-dark);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(to right, var(--accent-amber), var(--accent-emerald));
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    /* Agent Workflow Execution Pipeline */
+    .agent-pipeline {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 900px) {
+      .agent-pipeline { grid-template-columns: 1fr; }
+    }
+
+    .agent-step {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      position: relative;
+    }
+
+    .agent-step.active {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+    }
+
+    .agent-step.done {
+      border-color: var(--accent-emerald);
+    }
+
+    .agent-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .agent-time {
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-dim);
+    }
+
+    /* Tool Activity Grid */
+    .tool-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .tool-table th {
+      text-align: left;
+      padding: 0.6rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    .tool-table td {
+      padding: 0.65rem 0.6rem;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.5);
+    }
+
+    .tool-tag {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .tool-tag.core { background: rgba(99, 102, 241, 0.2); color: var(--accent-indigo); }
+    .tool-tag.supporting { background: rgba(107, 114, 128, 0.2); color: var(--text-muted); }
+
+    /* Human-in-the-Loop Approval Queue Card */
+    .approval-card {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      border-radius: 10px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .approval-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--accent-amber);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .approval-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn-approve {
+      flex: 1;
+      background: var(--accent-emerald);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-reject {
+      flex: 1;
+      background: var(--accent-rose);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Event Bus Feed */
+    .event-feed {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 280px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+    }
+
+    .event-item {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .event-time { color: var(--text-dim); }
+    .event-pub { color: var(--accent-cyan); font-weight: 600; }
+    .event-text { color: var(--text-muted); }
+
+    /* Tabs & Content Toggle */
+    .tabs-bar {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.5rem 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .tab-btn.active {
+      color: var(--text-main);
+      background: var(--bg-card-hover);
+    }
+  </style>
+</head>
+<body>
+
+  <header style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid var(--border-color); background: var(--bg-card);">
+    <div>
+      <div style="font-size: 20px; font-weight: 600; color: #ffffff;">AI Incident Dashboard</div>
+      <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Submit and resolve IT incidents with 5-agent AI coordination</div>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 500;">
+        <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></div>
+        Ready
+      </div>
+      <button onclick="fetchLatestData()" style="background: var(--bg-card-hover); color: var(--text-muted); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-9.5l5.25 5.25"/></svg>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Back to Dashboard -->
+    <div style="margin-bottom: 1rem;">
+      <button onclick="window.location.href='/'" style="background: var(--bg-card-hover); color: var(--text-main); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 500;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Dashboard
+      </button>
+    </div>
+
+    <!-- Triage Command Panel -->
+    <div class="dashboard-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>⚡ Incident Analysis & Resolution</span>
+          </div>
+          <button class="btn-submit" style="background:#374151;" onclick="triggerTestToolFailure()">
+            ⚠ Test Tool Failure
+          </button>
+        </div>
+
+
+        <!-- Active Incident Card (INC-1025 Layout) -->
+        <div class="incident-details-card" id="incidentDetailsCard">
+          <div class="inc-meta-row">
+            <div>
+              <div class="inc-id" id="incIdDisplay">INC-1025</div>
+              <div style="font-size: 0.85rem; color: var(--text-muted);" id="incIssueDisplay">VPN connection timeout error during TLS handshake</div>
+            </div>
+            <div id="statusBadgeContainer">
+              <span class="badge badge-auto">✓ AUTO-RESOLUTION</span>
+            </div>
+          </div>
+
+          <div class="confidence-meter">
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Confidence Score:</span>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="confBarFill" style="width: 92%;"></div>
+            </div>
+            <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent-emerald);" id="confTextDisplay">92%</span>
+          </div>
+
+          <!-- 5-Agent Execution Workflow Timeline -->
+          <div style="margin-top: 0.5rem;">
+            <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem;">Agent Pipeline Execution</div>
+            <div class="agent-pipeline">
+              <div class="agent-step done" id="stepPlanner">
+                <div class="agent-name">1. Planner <span style="color:var(--accent-emerald);">✓</span></div>
+                <div class="agent-time" id="timePlanner">1.1 sec</div>
+              </div>
+              <div class="agent-step done" id="stepResearcher">
+                <div class="agent-name">2. Researcher <span style="color:var(--accent-emerald);">✓</span></div>
+                <div class="agent-time" id="timeResearcher">2.4 sec</div>
+              </div>
+              <div class="agent-step done" id="stepAnalysis">
+                <div class="agent-name">3. Analysis <span style="color:var(--accent-emerald);">✓</span></div>
+                <div class="agent-time" id="timeAnalysis">1.6 sec</div>
+              </div>
+              <div class="agent-step done" id="stepDecision">
+                <div class="agent-name">4. Decision <span style="color:var(--accent-emerald);">✓</span></div>
+                <div class="agent-time" id="timeDecision">1.3 sec</div>
+              </div>
+              <div class="agent-step done" id="stepExecutor">
+                <div class="agent-name">5. Executor <span style="color:var(--accent-emerald);">✓</span></div>
+                <div class="agent-time" id="timeExecutor">0.7 sec</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Output Box -->
+          <div style="background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-top: 0.5rem;">
+            <div style="font-size: 0.8rem; font-weight: 600; color: var(--accent-cyan); margin-bottom: 0.5rem;">Final Synthesized Solution Response</div>
+            <div id="solutionOutput" style="white-space: pre-line; font-size: 0.85rem; color: var(--text-main);">
+              Submit an issue above or click 'Run Triage Pipeline' to process the incident through the 5-agent engine.
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Incident History Panel -->
+        <div class="panel" style="margin-top: 1rem;">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>🕒 Recent Incident History (Stored in Database)</span>
+            </div>
+            <button class="btn-submit" style="padding: 0.4rem 0.85rem; font-size: 0.75rem; background: #1F2937;" onclick="loadRecentIncidents()">Refresh History</button>
+          </div>
+
+          <table class="tool-table">
+            <thead>
+              <tr>
+                <th>Incident ID</th>
+                <th>Employee</th>
+                <th>Category</th>
+                <th>Issue</th>
+                <th>Severity</th>
+                <th>Confidence</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody">
+              <tr>
+                <td colspan="7" style="text-align:center; color:var(--text-dim);">Loading recent incident history...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Right Column: Tool Activity & HITL Queue -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <!-- HITL Queue Panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>⚠ Human-in-the-Loop Approval Queue</span>
+            </div>
+          </div>
+
+          <div id="approvalQueueContainer" style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <div class="approval-card">
+              <div class="approval-header">
+                <span>INC-1022 (Security Action)</span>
+                <span class="badge badge-pending">PENDING</span>
+              </div>
+              <div style="font-size: 0.8rem; color: var(--text-main);">
+                <strong>Action:</strong> Disable Active Directory Account EMP1026<br>
+                <strong>Reason:</strong> Security incident alert flagged by EDR scanner.
+              </div>
+              <div class="approval-actions">
+                <button class="btn-approve" onclick="approveAction('INC-1022')">Approve Action</button>
+                <button class="btn-reject" onclick="rejectAction('INC-1022')">Reject</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tool Activity Table (Recommendation #6) -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>🛠 Registered Tools & Execution Stats</span>
+            </div>
+          </div>
+
+          <table class="tool-table">
+            <thead>
+              <tr>
+                <th>Tool Name</th>
+                <th>Type</th>
+                <th>Calls</th>
+                <th>Success</th>
+                <th>Latency</th>
+              </tr>
+            </thead>
+            <tbody id="toolTableBody">
+              <tr>
+                <td>Knowledge Base</td>
+                <td><span class="tool-tag core">CORE</span></td>
+                <td>14</td>
+                <td><span style="color:var(--accent-emerald);">100%</span></td>
+                <td>12ms</td>
+              </tr>
+              <tr>
+                <td>Incident Database</td>
+                <td><span class="tool-tag core">CORE</span></td>
+                <td>18</td>
+                <td><span style="color:var(--accent-emerald);">100%</span></td>
+                <td>18ms</td>
+              </tr>
+              <tr>
+                <td>Ticket System</td>
+                <td><span class="tool-tag core">CORE</span></td>
+                <td>8</td>
+                <td><span style="color:var(--accent-emerald);">100%</span></td>
+                <td>25ms</td>
+              </tr>
+              <tr>
+                <td>Email (Gmail SMTP)</td>
+                <td><span class="tool-tag core">CORE</span></td>
+                <td>29</td>
+                <td><span style="color:var(--accent-emerald);">98%</span></td>
+                <td>120ms</td>
+              </tr>
+              <tr>
+                <td>Web Search</td>
+                <td><span class="tool-tag core">CORE</span></td>
+                <td>5</td>
+                <td><span style="color:var(--accent-emerald);">100%</span></td>
+                <td>340ms</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Audit Log Event Stream -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>📜 Real-Time Audit Log & Event Stream</span>
+            </div>
+          </div>
+          <div class="event-feed" id="eventFeed">
+            <div class="event-item">
+              <span class="event-time">15:38:10</span>
+              <span class="event-pub">[planner]</span>
+              <span class="event-text">Resolution plan created. 4 steps generated.</span>
+            </div>
+            <div class="event-item">
+              <span class="event-time">15:38:11</span>
+              <span class="event-pub">[researcher]</span>
+              <span class="event-text">Queried knowledge base: 42 records matched.</span>
+            </div>
+            <div class="event-item">
+              <span class="event-time">15:38:12</span>
+              <span class="event-pub">[analysis]</span>
+              <span class="event-text">Root cause identified. Confidence: 92%. Strategy: Auto-Fix.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const API_BASE = "";
+
+    async function runIncidentTriage() {
+      const query = document.getElementById("queryInput").value;
+      const empId = document.getElementById("empIdSelect").value;
+      const btn = document.getElementById("submitBtn");
+
+      if (!query.trim()) return;
+
+      btn.disabled = true;
+      btn.innerHTML = "Processing Agent Graph...";
+
+      // Clear previous states to show live processing
+      const steps = ['Planner', 'Researcher', 'Analysis', 'Decision', 'Executor'];
+      steps.forEach(s => {
+        const el = document.getElementById(`step${s}`);
+        if(el) { el.classList.remove("done", "active"); }
+      });
+      document.getElementById("solutionOutput").innerText = "Agents are actively investigating... Check the event stream below.";
+      
+      // Start polling for real-time events while the LLM runs
+      const pollInterval = setInterval(async () => {
+        try {
+          const eventsRes = await fetch(`${API_BASE}/events?limit=6`);
+          if (!eventsRes.ok) return;
+          const events = await eventsRes.json();
+          if (events && events.length > 0) {
+            // Update live event feed
+            const feed = document.getElementById("eventFeed");
+            feed.innerHTML = events.map(e => `
+              <div class="event-item">
+                <span class="event-time">${(e.timestamp || '').substring(11, 19)}</span>
+                <span class="event-pub" style="color:var(--accent-cyan);">[${e.publisher}]</span>
+                <span class="event-text">${e.event_type}: ${JSON.stringify(e.payload)}</span>
+              </div>
+            `).join('');
+
+            // Highlight the currently active agent step
+            const latestPub = events[0].publisher.toLowerCase();
+            steps.forEach(s => {
+              const el = document.getElementById(`step${s}`);
+              if(el) {
+                if (latestPub.includes(s.toLowerCase())) {
+                   el.classList.add("active");
+                   el.classList.remove("done");
+                } else if (el.classList.contains("active")) {
+                   el.classList.remove("active");
+                   el.classList.add("done");
+                }
+              }
+            });
+          }
+        } catch(e) {}
+      }, 1000);
+
+      try {
+        const res = await fetch(`${API_BASE}/ask`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: query, employee_id: empId })
+        });
+        const data = await res.json();
+
+        // Stop polling and mark everything as done
+        clearInterval(pollInterval);
+        steps.forEach(s => {
+          const el = document.getElementById(`step${s}`);
+          if(el) { el.classList.remove("active"); el.classList.add("done"); }
+        });
+
+        if (data.success) {
+          document.getElementById("incIdDisplay").innerText = data.incident_id;
+          document.getElementById("incIssueDisplay").innerText = data.query;
+          document.getElementById("solutionOutput").innerText = data.answer;
+
+          const conf = Math.round(data.confidence || 85);
+          document.getElementById("confTextDisplay").innerText = `${conf}%`;
+          document.getElementById("confBarFill").style.width = `${conf}%`;
+
+          // Status Badge
+          const statusContainer = document.getElementById("statusBadgeContainer");
+          if (data.requires_approval || data.status === "PENDING_APPROVAL") {
+            statusContainer.innerHTML = `<span class="badge badge-pending">⚠ PENDING APPROVAL</span>`;
+          } else if (data.status === "AUTO-RESOLUTION" || data.status === "RESOLVED") {
+            statusContainer.innerHTML = `<span class="badge badge-auto">✓ AUTO-RESOLUTION</span>`;
+          } else {
+            statusContainer.innerHTML = `<span class="badge badge-escalated">⚡ ESCALATED TICKET</span>`;
+          }
+
+          // Timings
+          if (data.timings) {
+            document.getElementById("timePlanner").innerText = `${data.timings.planner || 1.1} sec`;
+            document.getElementById("timeResearcher").innerText = `${data.timings.researcher || 2.4} sec`;
+            document.getElementById("timeAnalysis").innerText = `${data.timings.analysis || 1.6} sec`;
+            document.getElementById("timeDecision").innerText = `${data.timings.decision || 1.3} sec`;
+            document.getElementById("timeExecutor").innerText = `${data.timings.executor || 0.7} sec`;
+          }
+
+          refreshDashboardData();
+        }
+      } catch (err) {
+        clearInterval(pollInterval);
+        alert("Error executing workflow: " + err);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = "Run Triage Pipeline";
+      }
+    }
+
+    async function refreshDashboardData() {
+      try {
+        const metricsRes = await fetch(`${API_BASE}/observability/metrics`);
+        const metrics = await metricsRes.json();
+
+        if (metrics.incident_counts) {
+          document.getElementById("statTotal").innerText = metrics.incident_counts.total;
+          document.getElementById("statAuto").innerText = metrics.incident_counts.auto_resolved;
+          document.getElementById("statPending").innerText = metrics.incident_counts.pending_approval;
+          document.getElementById("statEscalated").innerText = metrics.incident_counts.escalated;
+        }
+
+        // Tools Table
+        if (metrics.tool_stats) {
+          const tbody = document.getElementById("toolTableBody");
+          tbody.innerHTML = metrics.tool_stats.map(t => `
+            <tr>
+              <td>${t.name}</td>
+              <td><span class="tool-tag ${t.tool_type.toLowerCase()}">${t.tool_type}</span></td>
+              <td>${t.total_calls}</td>
+              <td><span style="color:var(--accent-emerald);">${t.success_rate}%</span></td>
+              <td>${t.avg_latency_ms}ms</td>
+            </tr>
+          `).join('');
+        }
+
+        // HITL Queue
+        const hitlRes = await fetch(`${API_BASE}/approval-queue`);
+        const queue = await hitlRes.json();
+        const qContainer = document.getElementById("approvalQueueContainer");
+
+        if (queue.length === 0) {
+          qContainer.innerHTML = `<div style="font-size:0.8rem; color:var(--text-dim);">No pending approvals in queue.</div>`;
+        } else {
+          qContainer.innerHTML = queue.map(item => `
+            <div class="approval-card">
+              <div class="approval-header">
+                <span>${item.incident_id} (${item.category || 'Security'})</span>
+                <span class="badge badge-pending">PENDING APPROVAL</span>
+              </div>
+              <div style="font-size: 0.8rem; color: var(--text-main);">
+                <strong>Action:</strong> ${item.approval_action || item.resolution_strategy || 'High-Risk Privilege Execution'}<br>
+                <strong>Issue:</strong> ${item.issue}
+              </div>
+              <div class="approval-actions">
+                <button class="btn-approve" onclick="approveAction('${item.incident_id}')">Approve</button>
+                <button class="btn-reject" onclick="rejectAction('${item.incident_id}')">Reject</button>
+              </div>
+            </div>
+          `).join('');
+        }
+
+        // Events Feed
+        const eventsRes = await fetch(`${API_BASE}/events?limit=10`);
+        const events = await eventsRes.json();
+        const feed = document.getElementById("eventFeed");
+        feed.innerHTML = events.map(e => `
+          <div class="event-item">
+            <span class="event-time">${(e.timestamp || '').substring(11, 19)}</span>
+            <span class="event-pub">[${e.publisher}]</span>
+            <span class="event-text">${e.event_type}: ${JSON.stringify(e.payload)}</span>
+          </div>
+        `).join('');
+
+        await loadRecentIncidents();
+
+      } catch (err) {
+        console.error("Dashboard refresh error:", err);
+      }
+    }
+
+    async function loadRecentIncidents() {
+      try {
+        const res = await fetch(`${API_BASE}/incidents?limit=10`);
+        const incidents = await res.json();
+        const tbody = document.getElementById("historyTableBody");
+
+        if (!incidents || incidents.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-dim);">No incidents recorded yet.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = incidents.map(inc => {
+          let badgeClass = "badge-auto";
+          if (inc.status === "PENDING_APPROVAL") badgeClass = "badge-pending";
+          else if (inc.status === "ESCALATION" || inc.status === "REJECTED") badgeClass = "badge-escalated";
+
+          const conf = Math.round(inc.confidence || 85);
+          const issueTrunc = inc.issue ? (inc.issue.length > 35 ? inc.issue.substring(0, 35) + "..." : inc.issue) : "N/A";
+
+          return `
+            <tr style="cursor:pointer;" onclick="viewIncidentDetails('${inc.incident_id}')" title="Click to view details">
+              <td style="font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--accent-cyan);">${inc.incident_id}</td>
+              <td>${inc.employee_id || 'EMP1024'}</td>
+              <td>${inc.category || 'General IT'}</td>
+              <td>${issueTrunc}</td>
+              <td><span style="font-weight:600; color:${inc.severity === 'High' ? 'var(--accent-rose)' : 'var(--text-main)'}">${inc.severity || 'Medium'}</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;">${conf}%</td>
+              <td><span class="badge ${badgeClass}">${inc.status}</span></td>
+            </tr>
+          `;
+        }).join('');
+      } catch (e) {
+        console.error("Error loading incident history:", e);
+      }
+    }
+
+    async function viewIncidentDetails(incId) {
+      try {
+        const res = await fetch(`${API_BASE}/incidents/${incId}`);
+        if (!res.ok) return;
+        const data = await res.json();
+
+        document.getElementById("incIdDisplay").innerText = data.incident_id;
+        document.getElementById("incIssueDisplay").innerText = data.issue;
+        
+        let sol = `Strategy: ${data.resolution_strategy || data.status}\nAssigned To: ${data.assigned_to || 'IT Auto-Bot'}\nUpdated: ${data.updated_at}`;
+        if (data.audit_trail && data.audit_trail.length > 0) {
+          sol += "\n\n--- Audit Log Timeline ---\n" + data.audit_trail.map(a => `[${(a.timestamp || '').substring(11,19)}] ${a.agent_or_system}: ${a.description}`).join("\n");
+        }
+        document.getElementById("solutionOutput").innerText = sol;
+
+        const conf = Math.round(data.confidence || 85);
+        document.getElementById("confTextDisplay").innerText = `${conf}%`;
+        document.getElementById("confBarFill").style.width = `${conf}%`;
+
+        const statusContainer = document.getElementById("statusBadgeContainer");
+        if (data.requires_approval || data.status === "PENDING_APPROVAL") {
+          statusContainer.innerHTML = `<span class="badge badge-pending">⚠ PENDING APPROVAL</span>`;
+        } else if (data.status === "AUTO-RESOLUTION" || data.status === "RESOLVED") {
+          statusContainer.innerHTML = `<span class="badge badge-auto">✓ AUTO-RESOLUTION</span>`;
+        } else {
+          statusContainer.innerHTML = `<span class="badge badge-escalated">⚡ ${data.status}</span>`;
+        }
+      } catch (err) {
+        console.error("Error viewing incident:", err);
+      }
+    }
+
+    async function approveAction(incId) {
+      if (!confirm(`Approve sensitive action for ${incId}?`)) return;
+      await fetch(`${API_BASE}/incidents/${incId}/approve`, { method: "POST" });
+      refreshDashboardData();
+    }
+
+    async function rejectAction(incId) {
+      if (!confirm(`Reject sensitive action for ${incId}?`)) return;
+      await fetch(`${API_BASE}/incidents/${incId}/reject`, { method: "POST" });
+      refreshDashboardData();
+    }
+
+    async function triggerTestToolFailure() {
+      const toolName = prompt("Enter tool name to simulate connection failure (e.g. email, knowledge_base, incident_database):", "email");
+      if (!toolName) return;
+
+      const res = await fetch(`${API_BASE}/tools/test-failure`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tool_name: toolName, simulate_failure: true })
+      });
+      const data = await res.json();
+      alert(data.message + "\n\nNow run a triage query to observe automatic retries, backoff, and graceful fallback!");
+      refreshDashboardData();
+    }
+
+    function switchUserRole() {
+      const role = document.getElementById("roleSelect").value;
+      alert(`Switched user context to: ${role.toUpperCase()}`);
+    }
+
+    // Initial load
+    
+    window.onload = async function() {
+      // Restore query from localStorage if it exists
+      const query = localStorage.getItem("incident_query");
+      const empId = localStorage.getItem("incident_empId");
+      
+      if (query && query.trim() !== "") {
+        // Run triage automatically
+        await runIncidentTriageFromStorage(query, empId);
+        // Clear it so refreshing doesn't rerun unless we want it to, or just leave it for demo purposes
+      } else {
+        await refreshDashboardData();
+      }
+    };
+    
+    async function runIncidentTriageFromStorage(query, empId) {
+      document.getElementById("solutionOutput").innerText = "Agents are actively investigating... Check the event stream below.";
+      
+      const steps = ['Planner', 'Researcher', 'Analysis', 'Decision', 'Executor'];
+      steps.forEach(s => {
+        const el = document.getElementById(`step${s}`);
+        if(el) { el.classList.remove("done", "active"); }
+      });
+      
+      const pollInterval = setInterval(async () => {
+        try {
+          const eventsRes = await fetch(`${API_BASE}/events?limit=6`);
+          if (!eventsRes.ok) return;
+          const events = await eventsRes.json();
+          if (events && events.length > 0) {
+            const feed = document.getElementById("eventFeed");
+            feed.innerHTML = events.map(e => `
+              <div class="event-item">
+                <span class="event-time">${(e.timestamp || '').substring(11, 19)}</span>
+                <span class="event-pub" style="color:var(--accent-cyan);">[${e.publisher}]</span>
+                <span class="event-text">${e.event_type}: ${JSON.stringify(e.payload)}</span>
+              </div>
+            `).join('');
+
+            const latestPub = events[0].publisher.toLowerCase();
+            steps.forEach(s => {
+              const el = document.getElementById(`step${s}`);
+              if(el) {
+                if (latestPub.includes(s.toLowerCase())) {
+                   el.classList.add("active");
+                   el.classList.remove("done");
+                } else if (el.classList.contains("active")) {
+                   el.classList.remove("active");
+                   el.classList.add("done");
+                }
+              }
+            });
+          }
+        } catch(e) {}
+      }, 1000);
+
+      try {
+        const res = await fetch(`${API_BASE}/ask`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: query, employee_id: empId || "EMP001" })
+        });
+        const data = await res.json();
+
+        clearInterval(pollInterval);
+        steps.forEach(s => {
+          const el = document.getElementById(`step${s}`);
+          if(el) { el.classList.remove("active"); el.classList.add("done"); }
+        });
+
+        if (data.success) {
+          document.getElementById("incIdDisplay").innerText = data.incident_id;
+          document.getElementById("incIssueDisplay").innerText = data.query;
+          document.getElementById("solutionOutput").innerText = data.answer;
+
+          const conf = Math.round(data.confidence || 85);
+          document.getElementById("confTextDisplay").innerText = `${conf}%`;
+          document.getElementById("confBarFill").style.width = `${conf}%`;
+
+          const statusContainer = document.getElementById("statusBadgeContainer");
+          if (data.requires_approval || data.status === "PENDING_APPROVAL") {
+            statusContainer.innerHTML = `<span class="badge badge-pending">⚠ PENDING APPROVAL</span>`;
+          } else if (data.status === "AUTO-RESOLUTION" || data.status === "RESOLVED") {
+            statusContainer.innerHTML = `<span class="badge badge-auto">✓ AUTO-RESOLUTION</span>`;
+          } else {
+            statusContainer.innerHTML = `<span class="badge badge-escalated">⚡ ESCALATED TICKET</span>`;
+          }
+
+          if (data.timings) {
+            document.getElementById("timePlanner").innerText = `${data.timings.planner || 1.1} sec`;
+            document.getElementById("timeResearcher").innerText = `${data.timings.researcher || 2.4} sec`;
+            document.getElementById("timeAnalysis").innerText = `${data.timings.analysis || 1.6} sec`;
+            document.getElementById("timeDecision").innerText = `${data.timings.decision || 1.3} sec`;
+            document.getElementById("timeExecutor").innerText = `${data.timings.executor || 0.7} sec`;
+          }
+
+          refreshDashboardData();
+        }
+      } catch (err) {
+        clearInterval(pollInterval);
+        alert("Error executing workflow: " + err);
+      }
+    }
+
+  </script>
+</body>
+</html>

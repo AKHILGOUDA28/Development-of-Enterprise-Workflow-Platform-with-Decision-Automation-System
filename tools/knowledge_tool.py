@@ -11,7 +11,13 @@ class KnowledgeTool(BaseTool):
     description = "Searches the local knowledge base for troubleshooting steps related to an IT issue."
     args_schema = KnowledgeToolSchema
 
+    _cache = {}
+
     def _execute(self, query: str) -> str:
+        query_clean = query.strip().lower()
+        if query_clean in self._cache:
+            return self._cache[query_clean]
+
         kb_path = os.path.join(os.path.dirname(__file__), "..", "database", "knowledge_base.json")
         try:
             with open(kb_path, "r") as f:
@@ -26,5 +32,9 @@ class KnowledgeTool(BaseTool):
                 results.append(f"Issue: {item['issue']}\nSolution:\n- " + "\n- ".join(item['solution']))
         
         if results:
-            return "\n\n".join(results)
-        return "No matching solutions found in the knowledge base."
+            res_str = "\n\n".join(results)
+        else:
+            res_str = "No matching solutions found in the knowledge base."
+            
+        self._cache[query_clean] = res_str
+        return res_str

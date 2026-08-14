@@ -1,8 +1,30 @@
+# Core AI / LLM
 langchain
 langchain-groq
 langchain-core
 langgraph
-python-dotenv
+
+# Web Framework
 fastapi
-uvicorn
+uvicorn[standard]
+python-multipart
+
+# Database
+psycopg2-binary
+sqlalchemy
+
+# Auth & Security
+pyjwt
+python-dotenv
+
+# HTTP
+requests
+httpx
+
+# Utilities
 pydantic
+uuid-utils
+faker
+
+# Monitoring / Tracing (optional — set LANGCHAIN_API_KEY to enable)
+# langsmith

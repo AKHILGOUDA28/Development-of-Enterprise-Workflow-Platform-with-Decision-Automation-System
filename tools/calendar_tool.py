@@ -139,18 +139,16 @@ class CalendarTool(BaseTool):
             )
 
         elif action == "schedule_work":
-            # Simulated scheduling — return a confirmation
+            # Find next available date that is not a blackout date
             now = datetime.now()
-            proposed_time = now + timedelta(days=2)
+            blackout_dates = {bd["date"] for bd in BLACKOUT_DATES}
+            days_ahead = 2
+            proposed_time = now + timedelta(days=days_ahead)
+            while proposed_time.strftime("%Y-%m-%d") in blackout_dates and days_ahead < 30:
+                days_ahead += 1
+                proposed_time = now + timedelta(days=days_ahead)
+
             proposed_str = proposed_time.strftime("%Y-%m-%d 02:00")
-            # Check blackout
-            date_str = proposed_time.strftime("%Y-%m-%d")
-            for bd in BLACKOUT_DATES:
-                if bd["date"] == date_str:
-                    return (
-                        f"Cannot schedule work on {date_str}: {bd['reason']}. "
-                        f"Please choose another date."
-                    )
             return (
                 f"Work Order Scheduled:\n"
                 f"  Task: {query}\n"
@@ -158,6 +156,7 @@ class CalendarTool(BaseTool):
                 f"  Status: Pending Manager Approval\n"
                 f"  Reference ID: WO-{now.strftime('%Y%m%d%H%M')}"
             )
+
 
         return (
             f"Unknown action '{action}'. Use: "

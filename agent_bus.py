@@ -15,7 +15,8 @@ Usage:
 """
 
 import uuid
-from datetime import datetime
+import json
+from datetime import datetime, timezone
 from threading import Lock
 from typing import Callable, Dict, List, Optional
 
@@ -35,7 +36,7 @@ class AgentEvent:
         self.event_type = event_type
         self.payload    = payload
         self.session_id = session_id
-        self.timestamp  = datetime.utcnow().isoformat() + "Z"
+        self.timestamp  = datetime.now(timezone.utc).isoformat() + "Z"
 
     def to_dict(self) -> dict:
         return {
@@ -87,6 +88,16 @@ class AgentEventBus:
             The created AgentEvent instance.
         """
         event = AgentEvent(publisher, event_type, payload, session_id)
+
+        # Persist event in DB for production auditing
+        try:
+            from database.connection import db_manager
+            db_manager.execute("""
+                INSERT INTO agent_events (session_id, publisher, event_type, payload, timestamp)
+                VALUES (?, ?, ?, ?, ?)
+            """, (session_id, publisher, event_type, json.dumps(payload), event.timestamp))
+        except Exception as db_err:
+            pass
 
         with self._lock:
             # Per-session log

@@ -57,7 +57,7 @@ class TestOriginalTools(unittest.TestCase):
         db = DatabaseTool()
         res = db.run(query="Printer")
         self.assertTrue(res["success"])
-        self.assertIn("Restart printer", res["result"])
+        self.assertIn("Printer spooler offline", res["result"])
 
     def test_ticket_creation(self):
         """Ticket system creates and stores a ticket."""

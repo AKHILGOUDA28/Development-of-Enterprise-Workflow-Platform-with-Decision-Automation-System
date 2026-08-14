@@ -2,22 +2,21 @@
 web_search_tool.py
 ------------------
 Simulated Web Search / IT Knowledge Search Tool.
-
 Returns curated IT article summaries, technical documentation snippets,
 and community forum answers for a given IT-related query.
-Simulates integration with an enterprise search gateway.
 """
 
+from typing import Union
 from pydantic import BaseModel, Field
 from tools.base_tool import BaseTool
 
 
 # ---------------------------------------------------------------------------
-# Pydantic Schema
+# Pydantic Schema (Coerces both int and str for max_results)
 # ---------------------------------------------------------------------------
 class WebSearchSchema(BaseModel):
     query: str = Field(..., description="IT-related search query or topic")
-    max_results: int = Field(default=3, ge=1, le=10, description="Maximum number of results to return")
+    max_results: Union[int, str] = Field(default=3, description="Maximum number of results to return (integer 1-10)")
 
 
 # ---------------------------------------------------------------------------
@@ -25,14 +24,25 @@ class WebSearchSchema(BaseModel):
 # ---------------------------------------------------------------------------
 ARTICLES = [
     {
+        "title": "How to Troubleshoot Application Installation Errors & UAC Rights",
+        "source": "Windows Enterprise Support",
+        "url": "https://support.microsoft.com/app-install-fix",
+        "snippet": (
+            "Application installation failures are frequently caused by insufficient administrator rights, "
+            "corrupted %TEMP% files, or missing Visual C++ redistributable packages. "
+            "Fix: (1) Run installer as Administrator (elevated prompt), (2) Clear temp directory, "
+            "(3) Temporarily disable antivirus real-time shield during install."
+        ),
+        "tags": ["software", "application", "install", "installation", "uac", "windows"]
+    },
+    {
         "title": "How to Troubleshoot VPN Connectivity Issues After Windows Update",
         "source": "Microsoft Support Docs",
         "url": "https://support.microsoft.com/vpn-troubleshoot",
         "snippet": (
             "After a Windows Update, VPN clients may fail to connect due to changes in "
             "network adapter settings. Resolution: (1) Reinstall VPN client, "
-            "(2) Reset WinSock stack with 'netsh winsock reset', (3) Check firewall rules. "
-            "Most connectivity issues resolve after restarting the 'IKE and AuthIP IPsec Keying Modules' service."
+            "(2) Reset WinSock stack with 'netsh winsock reset', (3) Check firewall rules."
         ),
         "tags": ["vpn", "windows", "update", "network", "connectivity"]
     },
@@ -43,8 +53,7 @@ ARTICLES = [
         "snippet": (
             "Login failures after DC upgrade are commonly caused by Kerberos ticket caching issues. "
             "Steps: (1) Force Group Policy update with 'gpupdate /force', "
-            "(2) Flush Kerberos tickets with 'klist purge', "
-            "(3) Verify DNS is pointing to the new DC, (4) Check AD replication status."
+            "(2) Flush Kerberos tickets with 'klist purge', (3) Verify DNS."
         ),
         "tags": ["active directory", "domain", "login", "authentication", "kerberos"]
     },
@@ -53,77 +62,10 @@ ARTICLES = [
         "source": "HP Enterprise Support",
         "url": "https://support.hp.com/printer-offline",
         "snippet": (
-            "Enterprise printers show 'offline' status for several reasons: "
-            "IP address changes, print spooler corruption, or network adapter failure. "
-            "Fix: (1) Restart Print Spooler service, (2) Delete stuck jobs, "
-            "(3) Reassign printer IP using static DHCP lease, (4) Reinstall printer drivers."
+            "Enterprise printers show 'offline' status due to IP changes or print spooler corruption. "
+            "Fix: (1) Restart Print Spooler service, (2) Clear spooler cache, (3) Re-add printer."
         ),
         "tags": ["printer", "offline", "print spooler", "driver", "network"]
-    },
-    {
-        "title": "Wi-Fi Drops Intermittently — Enterprise WLAN Diagnosis Guide",
-        "source": "Cisco Networking Academy",
-        "url": "https://cisco.com/wlan-intermittent",
-        "snippet": (
-            "Intermittent Wi-Fi drops are often caused by channel congestion, DHCP exhaustion, "
-            "or rogue access points. Diagnosis steps: (1) Run 'netsh wlan show all' to assess signal, "
-            "(2) Check DHCP lease count on the controller, "
-            "(3) Enable band steering to push devices to 5 GHz, "
-            "(4) Review AP channel overlap using Wi-Fi analyzer."
-        ),
-        "tags": ["wifi", "wireless", "wlan", "drops", "network", "dhcp"]
-    },
-    {
-        "title": "Blue Screen of Death (BSOD): DRIVER_IRQL_NOT_LESS_OR_EQUAL Fix",
-        "source": "Windows Debugging Community",
-        "url": "https://community.windows-debug.com/bsod-driver-irql",
-        "snippet": (
-            "This BSOD is caused by a driver accessing an invalid memory address. "
-            "Resolution: (1) Boot to Safe Mode, (2) Run 'sfc /scannow' for corrupted files, "
-            "(3) Run 'chkdsk /f /r' to repair disk errors, "
-            "(4) Update or rollback the most recently installed driver, "
-            "(5) Use WinDbg to analyze the memory dump file."
-        ),
-        "tags": ["bsod", "blue screen", "driver", "crash", "memory", "hardware"]
-    },
-    {
-        "title": "Office 365 Outlook: Profile Corrupted — Cannot Open PST File",
-        "source": "Microsoft 365 Admin Docs",
-        "url": "https://docs.microsoft.com/outlook-pst-corrupt",
-        "snippet": (
-            "Corrupted Outlook profiles manifest as startup crashes or 'Cannot open your default email folders'. "
-            "Fix: (1) Run 'scanpst.exe' (Inbox Repair Tool) against the PST file, "
-            "(2) Create a new Outlook profile via Control Panel → Mail, "
-            "(3) If using Exchange, reconnect mailbox via Admin Center."
-        ),
-        "tags": ["outlook", "office 365", "email", "pst", "profile", "corrupt"]
-    },
-    {
-        "title": "Server Disk Full: Immediate Actions for Production Systems",
-        "source": "SysAdmin Handbook",
-        "url": "https://sysadmin.handbook.com/disk-full",
-        "snippet": (
-            "A full disk on a production server can cause service outages. Immediate steps: "
-            "(1) Run 'du -sh /*' to identify large directories, "
-            "(2) Clear log files in /var/log older than 30 days, "
-            "(3) Remove old package caches with 'apt-get clean', "
-            "(4) Move archived data to NAS or cold storage, "
-            "(5) Set up logrotate for automatic log management."
-        ),
-        "tags": ["server", "disk", "storage", "full", "linux", "logs"]
-    },
-    {
-        "title": "Two-Factor Authentication (2FA) Bypass Issues — Enterprise MFA Guide",
-        "source": "Security Best Practices Hub",
-        "url": "https://security-hub.com/mfa-issues",
-        "snippet": (
-            "MFA failures in enterprise environments are often caused by time sync issues or "
-            "provisioning errors. Checklist: (1) Ensure device clock is synchronized with NTP, "
-            "(2) Re-provision the MFA token in the admin portal, "
-            "(3) Check if the user's account is locked in Active Directory, "
-            "(4) Verify RADIUS server connectivity for hardware token users."
-        ),
-        "tags": ["mfa", "2fa", "authentication", "security", "radius", "token"]
     },
 ]
 
@@ -139,17 +81,20 @@ class WebSearchTool(BaseTool):
     )
     args_schema = WebSearchSchema
 
-    def _execute(self, query: str, max_results: int = 3) -> str:
+    def _execute(self, query: str, max_results: Union[int, str] = 3) -> str:
         query_lower = query.lower()
 
-        # Score each article by tag/title keyword overlap
+        try:
+            limit = int(max_results)
+        except Exception:
+            limit = 3
+
         scored = []
         for article in ARTICLES:
             score = 0
             for tag in article["tags"]:
                 if tag in query_lower:
                     score += 2
-            # Title match bonus
             title_words = article["title"].lower().split()
             for word in query_lower.split():
                 if word in title_words and len(word) > 3:
@@ -157,14 +102,13 @@ class WebSearchTool(BaseTool):
             if score > 0:
                 scored.append((score, article))
 
-        # Sort by relevance
         scored.sort(key=lambda x: x[0], reverse=True)
-        results = [art for _, art in scored[:max_results]]
+        results = [art for _, art in scored[:limit]]
 
         if not results:
             return (
                 f"No relevant articles found for '{query}'. "
-                "Try more specific IT keywords (e.g., 'VPN', 'BSOD', 'printer offline')."
+                "Try keywords like 'install', 'VPN', 'BSOD', 'printer offline'."
             )
 
         lines = [f"Web Search Results for: '{query}' ({len(results)} found)\n"]
@@ -179,5 +123,4 @@ class WebSearchTool(BaseTool):
         return "\n".join(lines)
 
 
-# Singleton instance
 web_search_tool = WebSearchTool()

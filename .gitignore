@@ -1,3 +1,46 @@
-venv/
-__pycache__/
+# Secrets — NEVER COMMIT
 .env
+*.pem
+*.key
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Database files (SQLite)
+database/*.db
+database/*.db-shm
+database/*.db-wal
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Docker
+*.env.local
+
+# Dist
+node_modules/

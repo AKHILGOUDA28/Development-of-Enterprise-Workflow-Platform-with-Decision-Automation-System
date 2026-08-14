@@ -1,312 +1,332 @@
-# AI Agent Coordination & Decision Engine
+# AI IT Operations Command Center
 
-An enterprise-grade **AI Multi-Agent Coordination Platform** built with **LangChain**, **LangGraph**, **FastAPI**, **Groq (Llama 3.3)**, and **SQLite**.
-
-The system coordinates **5 specialized AI agents** through a structured pipeline: Planner → Researcher → Analysis → Decision → Executor. It integrates 9 enterprise tools, a persistent long-term memory system, a pub-sub agent event bus, real-time monitoring APIs, and a premium dark-mode enterprise dashboard.
+> **An AI-powered IT Incident Triage and Workflow Automation Platform** that uses coordinated LLM agents, enterprise tools, persistent memory, and policy-controlled actions to investigate, resolve, or escalate IT incidents automatically.
 
 ---
 
-## Milestones Completed
+## 📺 Live Dashboard
 
-| Milestone | Status | Description |
-|---|---|---|
-| **Milestone 1** — Agent Foundation | ✅ Done | 4-agent pipeline, 5 tools, FastAPI, SQLite, Dashboard |
-| **Milestone 2** — Tool Integration | ✅ Done | 4 new enterprise tools, tool registry monitoring, 9 tools total |
-| **Milestone 3** — Agent Coordination & Memory | ✅ Done | Analysis Agent, Event Bus, SQLite long-term memory, /events /memory APIs |
+**http://localhost:8000**
+
+| Credential | Username | Password | Role |
+|-----------|----------|----------|------|
+| Employee | `emp1024` | `password123` | Submit & view own incidents |
+| IT Support | `itsupport` | `support123` | Manage incidents & tickets |
+| Admin | `admin` | `admin123` | Full access + HITL approvals |
 
 ---
 
-## 5-Agent Coordination Pipeline
+## 🏗️ Architecture
 
 ```
-User Incident Form (Name, Email, Category, Priority, Description)
-         │
-         ▼
-  ┌─────────────────────────────────────────────────────────────────┐
-  │                   LangGraph State Graph                         │
-  │                                                                 │
-  │  Planner Agent  →  Researcher Agent  →  Analysis Agent          │
-  │  (Plan steps)     (KB + DB + Web)      (Root cause + severity)  │
-  │                                              │                  │
-  │                              ┌───────────────┘                 │
-  │                              ▼                                  │
-  │              Decision Agent  →  Executor Agent                  │
-  │           (Auto-fix or Escalate)  (Final professional response) │
-  └─────────────────────────────────────────────────────────────────┘
-         │
-         ▼
-  Final Resolution on Dashboard + Email notification to user
-```
-
----
-
-## AI Agents
-
-| Agent | Role | New in v2? |
-|---|---|---|
-| **Planner** | Breaks the issue into a logical troubleshooting plan | — |
-| **Researcher** | Queries Knowledge Base, Incident DB, Web Search, HR System | Enhanced |
-| **Analysis** ⭐ | Performs root-cause analysis, severity scoring (Critical/High/Medium/Low), confidence score (0–100%), and recommends Auto-Fix or Escalate | **NEW** |
-| **Decision** | Evaluates analysis output; invokes ticket_system, email, calendar, weather tools | Enhanced |
-| **Executor** | Synthesizes all outputs into a final professional response | Enhanced |
-
----
-
-## Enterprise Tools (9 Total)
-
-| Tool | Description | New in v2? |
-|---|---|---|
-| `knowledge_base` | Searches `knowledge_base.json` for known IT solutions | — |
-| `incident_database` | Queries `incidents.db` for historical past tickets | — |
-| `ticket_system` | Creates a new support ticket in `tickets.db` with a unique `INC` ID | — |
-| `email` | Sends a real email via Gmail SMTP to the user's provided address | — |
-| `notification` | Logs an in-app system alert | — |
-| `hr_system` ⭐ | Employee lookups, department info, on-call schedules, manager assignments | **NEW** |
-| `weather_service` ⭐ | Weather conditions, data center environmental monitoring, severe alerts | **NEW** |
-| `calendar_system` ⭐ | Maintenance windows, blackout dates, scheduling, availability | **NEW** |
-| `web_search` ⭐ | Enterprise IT knowledge gateway search — curated article summaries | **NEW** |
-
-All tools extend `BaseTool` with: Pydantic schema validation, retry with exponential backoff, timeout protection.
-
----
-
-## Agent Communication Event Bus
-
-The `AgentEventBus` (`agent_bus.py`) provides a thread-safe **publish-subscribe** system for inter-agent coordination:
-
-```python
-from agent_bus import bus
-
-# Agents publish lifecycle events
-bus.publish("analysis_agent", "analysis_complete", {
-    "severity": "High",
-    "confidence": "85%",
-    "strategy": "Escalate"
-}, session_id="ABC123")
-
-# API consumers retrieve events
-events = bus.get_events(session_id="ABC123")
-stats  = bus.get_stats()
+Employee
+   ↓
+Incident API (FastAPI)
+   ↓
+LangGraph Orchestrator
+   ↓
+┌──────────┬──────────┬──────────┐
+│ Planner  │Researcher│ Analysis │
+│  Agent   │  Agent   │  Agent   │
+└──────────┴──────────┴──────────┘
+      ↓ Tool Registry ↓
+ KB · Incidents · HR · Calendar
+ Web Search · Infra · Ticket
+ Email · Notification
+   ↓
+Decision Agent → Policy Engine
+   ↓
+┌──────────────┬───────────────┐
+│  Auto-Resolve│   Escalate    │
+│  (email sent)│ (ticket + HITL)│
+└──────────────┴───────────────┘
+   ↓
+Executor Agent
+   ↓
+Dashboard · Notifications · Audit Log
 ```
 
 ---
 
-## Persistent Long-Term Memory
+## 🤖 Five Agents
 
-`LongTermMemory` is backed by **SQLite** — facts survive server restarts:
-
-```python
-from memory import long_memory
-
-long_memory.save("vpn_provider", "Cisco AnyConnect")
-long_memory.recall("vpn_provider")   # → "Cisco AnyConnect"
-long_memory.search("cisco")          # → [{"key": "vpn_provider", ...}]
-long_memory.show_all()               # → all entries
-long_memory.delete("vpn_provider")   # → True
-```
+| Agent | Responsibility |
+|-------|---------------|
+| **Planner** | Breaks incident into structured investigation plan |
+| **Researcher** | Calls enterprise tools to gather evidence |
+| **Analysis** | Determines root cause, severity, confidence score |
+| **Decision** | Policy-controlled routing: Auto-Fix / HITL / Escalate |
+| **Executor** | Finalizes resolution, sends notifications |
 
 ---
 
-## Dashboard (UI)
+## 🔧 Nine Tools
 
-The enterprise dashboard (`interface.html`) features:
-
-- **Sidebar Navigation**: 7 sections — Dashboard, Incidents, Knowledge Base, Tool Monitor, Agent Events, Memory Inspector, System Logs
-- **5-Agent Pipeline Visualization**: Live animated status cards (Pending → Running → Completed) for all 5 agents
-- **Incident Form**: Employee details, category dropdown, priority selector, issue description
-- **Output Panels**: Per-agent output panels (Plan, Research, Analysis, Decision, Executor Preview) + Final Resolution box
-- **Tool Monitor**: Table with per-tool call counts, success rates, avg latency, last used time
-- **Agent Events Feed**: Colored event timeline from the pub-sub bus, with session filtering
-- **Memory Inspector**: Live view of SQLite long-term memory with add/delete operations
-- **System Logs Terminal**: Dark-themed trace log output
-
----
-
-## API Endpoints (v2.0)
-
-### Core
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET`  | `/`           | Serves HTML Dashboard |
-| `GET`  | `/health`     | JSON health check (v2.0) |
-| `POST` | `/ask`        | Runs the full 5-agent workflow |
-
-### Tickets
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET`  | `/tickets`          | All tickets |
-| `GET`  | `/tickets/{id}`     | Specific ticket |
-| `POST` | `/tickets`          | Create ticket manually |
-| `PUT`  | `/tickets/{id}`     | Update ticket status |
-
-### Data
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET`  | `/knowledge`       | Knowledge base JSON |
-
-### Long-Term Memory ⭐
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET`    | `/memory`              | All memory entries |
-| `POST`   | `/memory`              | Save key-value fact |
-| `DELETE` | `/memory/{key}`        | Delete a memory entry |
-| `GET`    | `/memory/search/{q}`   | Full-text search |
-
-### Agent Events ⭐
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/events`           | Recent bus events (filterable by session/type) |
-| `GET` | `/events/stats`     | Event bus statistics |
-| `GET` | `/events/sessions`  | All active session IDs |
-
-### Monitoring ⭐
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/tools/stats`    | Per-tool call counts, success rates, avg latency |
-| `GET` | `/tools/list`     | All registered tools and descriptions |
-| `GET` | `/agents/status`  | Agent pipeline status and run counts |
+| Tool | Purpose |
+|------|---------|
+| Knowledge Base | Searches 100 approved IT resolution articles |
+| Incident Database | Finds similar historical incidents |
+| HR System | Looks up employee profiles, departments |
+| Calendar | Checks maintenance windows & blackout periods |
+| Web Search | External technical information |
+| Infrastructure | Simulated infrastructure monitoring connector |
+| Ticket System | Creates IT support tickets (INC-XXXXX) |
+| Email | Sends resolution instructions via Gmail SMTP |
+| Notification | Dashboard alerts & system notifications |
 
 ---
 
-## Technology Stack
+## 🛡️ Policy Engine
 
-| Layer | Technology |
-|---|---|
-| **LLM** | Groq — `llama-3.3-70b-versatile` |
-| **Agent Orchestration** | LangGraph + LangChain |
-| **Backend API** | FastAPI + Uvicorn |
-| **Databases** | SQLite (`incidents.db`, `tickets.db`, `memory.db`) |
-| **Knowledge Base** | JSON file (`knowledge_base.json`) |
-| **Email** | Python `smtplib` + Gmail SMTP |
-| **Frontend** | Vanilla HTML / CSS / JavaScript (dark mode) |
-| **Configuration** | `python-dotenv` |
+Sits between every AI decision and tool execution:
 
----
-
-## Project Structure
-
-```
-AI-Agent-Coordination-Decision-Engine/
-│
-├── .env                     ← API keys and email credentials
-├── requirements.txt         ← Python dependencies
-│
-├── config.py                ← Loads .env, initializes Groq LLM
-├── prompts.py               ← System prompt templates for all 5 agents
-├── workflow.py              ← LangGraph pipeline (5-agent graph)
-├── tracing.py               ← Runtime event logger
-├── memory.py                ← Short-term + SQLite long-term memory
-├── agent_bus.py             ← Pub-sub agent event bus ⭐ NEW
-├── utils_parser.py          ← JSON tool-call extractor
-│
-├── agents/                  ← Agent persona modules
-│   ├── planner.py
-│   ├── researcher.py        ← Tool calling loop + bus events
-│   ├── analysis.py          ← Root-cause analysis ⭐ NEW
-│   ├── decision.py          ← Tool calling + email trigger loop
-│   └── executor.py
-│
-├── tools/                   ← Enterprise tools
-│   ├── base_tool.py         ← Base class with retries and validation
-│   ├── registry.py          ← Registry with usage monitoring ⭐ ENHANCED
-│   ├── knowledge_tool.py    ← Knowledge Base search
-│   ├── database_tool.py     ← Incident Database query
-│   ├── ticket_tool.py       ← Support ticket creation
-│   ├── email_tool.py        ← Gmail SMTP email sender
-│   ├── notification_tool.py ← In-app alert logger
-│   ├── hr_tool.py           ← HR system simulation ⭐ NEW
-│   ├── weather_tool.py      ← Weather/environmental monitoring ⭐ NEW
-│   ├── calendar_tool.py     ← Scheduling/maintenance windows ⭐ NEW
-│   └── web_search_tool.py   ← IT knowledge search ⭐ NEW
-│
-├── database/                ← Persistent storage
-│   ├── knowledge_base.json  ← 20+ known IT issues and solutions
-│   ├── incidents.db         ← Historical incident database
-│   ├── tickets.db           ← Active support tickets
-│   └── memory.db            ← Long-term memory store ⭐ NEW
-│
-├── api.py                   ← FastAPI server (20 endpoints)
-├── interface.html           ← Enterprise Dashboard v2.0
-└── tests.py                 ← 39-test suite
-```
+| Action | Policy |
+|--------|--------|
+| Send email, notification | ✅ Auto-allowed |
+| Create ticket | ✅ Auto-allowed |
+| Unlock account | ✅ Auto-allowed |
+| Disable user account | ⏳ Requires human approval |
+| Grant admin rights | ⏳ Requires human approval |
+| Delete user data | 🚫 Permanently blocked |
+| Bypass MFA | 🚫 Permanently blocked |
 
 ---
 
-## Setup & Running
+## 🗄️ Database Schema
 
-### 1. Install dependencies
+| Table | Rows (seeded) | Purpose |
+|-------|--------------|---------|
+| `departments` | 10 | Company departments |
+| `employees` | 100 | Extended HR profiles |
+| `users` | 100+ | Authentication |
+| `incidents` | 500+ | Historical incidents |
+| `tickets` | 100+ | IT support tickets |
+| `knowledge_articles` | 100 | Resolution knowledge base |
+| `audit_logs` | 200+ | Complete action trail |
+| `agent_events` | 500+ | Agent lifecycle events |
+| `tool_executions` | — | Tool monitoring data |
+| `notifications` | 80+ | Email/dashboard notifications |
+| `long_term_memory` | 30+ | AI verified patterns |
+| `workflow_results` | — | Workflow output records |
 
+Supports **SQLite** (local dev) and **Supabase PostgreSQL** (production) — auto-detected via `DATABASE_URL`.
+
+---
+
+## 🚀 Quick Start
+
+### 1. Clone & Setup
 ```bash
+git clone https://github.com/AKHILGOUDA28/AI-Agent-Coordination-Decision-Engine.git
+cd AI-Agent-Coordination-Decision-Engine
+python -m venv venv
+venv\Scripts\activate        # Windows
+# source venv/bin/activate   # macOS/Linux
 pip install -r requirements.txt
 ```
 
-### 2. Configure environment variables
-
-Edit the `.env` file:
-
-```env
-GROQ_API_KEY=your_groq_api_key_here
-MODEL_NAME=llama-3.3-70b-versatile
-
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=your_gmail@gmail.com
-EMAIL_PASSWORD=your_gmail_app_password
-```
-
-> **Note**: For Gmail, generate a 16-character **App Password** from Google Account → Security → 2-Step Verification → App Passwords.
-
-### 3. Run the test suite
-
+### 2. Configure Environment
 ```bash
-python -m unittest tests.py -v
+# Copy and edit .env
+cp .env.example .env
 ```
 
-All **39 tests** should pass, covering:
-- Original tools (Knowledge, Database, Ticket, Email, Notification)
-- New enterprise tools (HR, Weather, Calendar, Web Search)
-- Tool registry monitoring (9 tools, call tracking, success rates)
-- Agent event bus (pub/sub, filtering, session isolation, stats)
-- Persistent long-term memory (save/recall/delete/search, cross-instance persistence)
-- 5-agent workflow (all fields, Analysis output, unique session IDs, bus events)
+Edit `.env`:
+```env
+GROQ_API_KEY=gsk_your_key_here
+MODEL_NAME=llama-3.3-70b-versatile
+DATABASE_URL=postgresql://user:pass@host:port/db  # optional; falls back to SQLite
+DIRECT_URL=postgresql://...                         # for DDL migrations
+JWT_SECRET_KEY=your-secret-key
+EMAIL_USER=your@gmail.com
+EMAIL_PASSWORD=your-app-password
+ALLOWED_ORIGINS=*
+```
 
-### 4. Start the server
+### 3. Seed Production Data
+```bash
+python database/seed.py
+# Optional: reset all data first
+python database/seed.py --reset
+```
 
+### 4. Start Server
 ```bash
 python api.py
+# or
+uvicorn api:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-Open **[http://localhost:8000](http://localhost:8000)** in your browser.
-
-### 5. Use the dashboard
-
-1. Fill in **Employee Name**, **ID**, **Department**, and **Email**
-2. Select **Issue Category** and **Priority**
-3. Describe your issue
-4. Click **Analyze Incident**
-5. Watch the **5-agent pipeline** animate in real-time
-6. Navigate to **Tool Monitor** to see live tool statistics
-7. Navigate to **Agent Events** to see the pub-sub coordination feed
-8. Navigate to **Memory Inspector** to view/add persistent facts
+### 5. Open Dashboard
+Navigate to **http://localhost:8000** and log in.
 
 ---
 
-## Data Flow Example
+## 🐳 Docker
 
-**Input**: *"My laptop cannot connect to the company VPN after today's Windows update."*
+```bash
+# Build
+docker build -t ai-incident-platform .
 
-| Step | Agent | Action |
-|---|---|---|
-| 1 | Planner | Creates 4-step VPN troubleshooting plan |
-| 2 | Researcher | Finds VPN solutions in KB + DB + Web Search; looks up HR on-call |
-| 3 | Analysis | Root cause: driver/config conflict from Windows Update. Severity: Medium. Confidence: 80% |
-| 4 | Decision | Detects known fix → calls `email` tool to send auto-fix steps to user |
-| 5 | Executor | Generates: "Restart VPN Service → Flush DNS → Reinstall Client" |
+# Run (with Supabase PostgreSQL)
+docker run -p 8000:8000 \
+  -e GROQ_API_KEY=gsk_... \
+  -e DATABASE_URL=postgresql://... \
+  -e JWT_SECRET_KEY=secret \
+  ai-incident-platform
 
-**Output**: Professional resolution on screen + email sent + ticket created (if escalated) + events logged to bus.
+# Run (SQLite fallback)
+docker run -p 8000:8000 \
+  -e GROQ_API_KEY=gsk_... \
+  -v $(pwd)/database:/app/database \
+  ai-incident-platform
+```
 
 ---
 
-## License
+## 📊 API Endpoints
 
-This project was developed as part of an AI Systems internship/project — Milestones 1–3.
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/auth/login` | JWT login |
+| `POST` | `/ask` | Submit incident → full workflow |
+| `GET` | `/incidents` | List incidents (filterable) |
+| `GET` | `/incidents/{id}` | Incident detail + audit trail |
+| `PUT` | `/incidents/{id}/status` | Update status (IT Support+) |
+| `POST` | `/incidents/{id}/approve` | HITL approve (Admin+) |
+| `POST` | `/incidents/{id}/reject` | HITL reject (Admin+) |
+| `GET` | `/analytics/summary` | KPI dashboard data |
+| `GET` | `/analytics/trends` | 30-day incident trend |
+| `GET` | `/analytics/agent-performance` | Agent timing stats |
+| `GET` | `/employees` | Employee list (IT Support+) |
+| `GET` | `/departments` | Department list |
+| `GET` | `/knowledge` | Knowledge base (filterable) |
+| `GET` | `/audit-logs` | Paginated audit trail |
+| `GET` | `/policy/table` | Full policy rule table |
+| `POST` | `/policy/evaluate` | Test a policy decision |
+| `GET` | `/tools/stats` | Tool health metrics |
+| `GET` | `/tools/executions` | Tool execution history |
+| `GET` | `/notifications` | Recent notifications |
+| `GET` | `/memory` | AI long-term memory |
+| `GET` | `/observability/metrics` | System observability |
+| `GET` | `/health` | Health check |
+| `GET` | `/docs` | Interactive API docs (Swagger) |
+
+---
+
+## 📋 Testing
+
+```bash
+# Unit tests
+python -m pytest tests/ -v
+
+# Policy engine smoke test
+python services/policy_engine.py
+
+# Seed script dry run
+python database/seed.py --reset
+```
+
+---
+
+## 🔒 Security Features
+
+- **JWT Authentication** — 24-hour tokens, HS256
+- **RBAC** — Employee / IT Support / Admin roles
+- **Rate Limiting** — Sliding window, 60 req/min per IP
+- **Policy Engine** — Hard rules between AI and tool execution
+- **Audit Logging** — Every action recorded with actor, timestamp, payload
+- **HITL** — High-risk actions always require human approval
+- **Environment variables** — No secrets in source code
+
+---
+
+## 🌐 Deployment
+
+| Component | Recommended Platform |
+|-----------|---------------------|
+| Frontend (dashboard) | Serve via FastAPI static / Vercel |
+| Backend API | Render / Railway / Fly.io / Docker |
+| Database | Supabase PostgreSQL |
+| LLM | Groq API (Llama 3.3 70B) |
+| Email | Gmail SMTP / Microsoft Graph |
+
+---
+
+## 📁 Project Structure
+
+```
+AI-Agent-Coordination/
+├── api.py                  # FastAPI REST API (all endpoints)
+├── workflow.py             # LangGraph workflow orchestrator
+├── agent_bus.py            # Event bus for agent coordination
+├── auth.py                 # JWT + RBAC
+├── config.py               # LLM + environment config
+├── prompts.py              # LangChain prompt templates
+├── memory.py               # Long-term memory manager
+├── tracing.py              # LangSmith tracer wrapper
+├── benchmark.py            # Evaluation benchmark suite
+├── performance_test.py     # Concurrent load testing
+│
+├── agents/
+│   ├── planner.py          # Planner Agent
+│   ├── researcher.py       # Researcher Agent
+│   ├── analysis.py         # Analysis Agent
+│   ├── decision.py         # Decision Agent
+│   └── executor.py         # Executor Agent
+│
+├── tools/
+│   ├── base_tool.py        # Base tool class (timeout, retry, backoff)
+│   ├── registry.py         # Tool registry + stats
+│   ├── knowledge_tool.py   # KB search
+│   ├── database_tool.py    # Historical incident search
+│   ├── hr_tool.py          # Employee/department lookup
+│   ├── calendar_tool.py    # Maintenance window check
+│   ├── web_search_tool.py  # External tech search
+│   ├── weather_tool.py     # Infrastructure monitoring (simulated)
+│   ├── ticket_tool.py      # Ticket creation
+│   ├── email_tool.py       # Email notification
+│   └── notification_tool.py# Dashboard notification
+│
+├── database/
+│   ├── connection.py       # SQLite + PostgreSQL manager
+│   ├── init_db.py          # Schema creation + bootstrap seed
+│   └── seed.py             # Production seed (500 incidents, 100 KB articles…)
+│
+├── services/
+│   ├── policy_engine.py    # Enterprise action policy table
+│   └── audit_service.py    # Centralized audit logging service
+│
+├── interface.html          # AI IT Operations Command Center (production dashboard)
+├── analysis.html           # Analytics deep-dive page
+│
+├── tests/
+│   ├── test_agents.py
+│   ├── test_tools.py
+│   ├── test_database.py
+│   ├── test_policy.py
+│   └── test_workflow.py
+│
+├── Dockerfile              # Multi-stage production Docker build
+├── requirements.txt
+├── .env                    # Secrets (never commit)
+├── .gitignore
+└── README.md
+```
+
+---
+
+## 💡 Explaining to Your Panel
+
+**Start with the problem:**
+> "In an enterprise, IT teams receive hundreds of incidents requiring repetitive investigation. My project automates the first level of this process."
+
+**Explain the flow:**
+> "When an employee submits an incident, the system creates an incident record, plans the investigation, gathers information from enterprise data sources, analyses the evidence, makes a policy-controlled decision, and either performs an approved action or escalates to human IT support."
+
+**Key differentiator:**
+> "The LLM is not directly allowed to perform arbitrary actions. Tool access is controlled through a registry and policy layer, every action is audited, and high-risk actions require human approval. This is what makes the project production-oriented."
+
+---
+
+*Built for internship demonstration — AI Agent Coordination & Decision Engine v4.0*
