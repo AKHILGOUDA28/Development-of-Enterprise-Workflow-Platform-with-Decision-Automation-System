@@ -249,10 +249,43 @@ def pending_approval_node(state: AgentState) -> dict:
     return state
 
 def route_decision(state: AgentState) -> str:
-    """Conditional Routing Logic from Decision Agent."""
+    """
+    Conditional Routing Logic from Decision Agent after Policy Engine Evaluation.
+    Enforces Security Boundary: Intended Action -> Policy Engine -> (ALLOWED / REQUIRES_APPROVAL / BLOCKED)
+    """
+    from services.policy_engine import policy_engine
+    
+    # Intended action determined by Decision Agent
     if state.get("requires_approval"):
-        return "pending_approval"
+        intended_action = state.get("approval_action") or "restart_service"
     elif state.get("status") == "AUTO-RESOLUTION" and state.get("auto_fix_available", True):
+        intended_action = "send_email"
+    else:
+        intended_action = "create_ticket"
+
+    severity = state.get("severity", "Medium")
+    approved = state.get("approved", False)
+    incident_id = state.get("incident_id")
+
+    # Evaluate intended action against enterprise policy rules
+    decision, reason = policy_engine.evaluate(
+        action=intended_action,
+        role="IT Support",
+        severity=severity,
+        approved=approved,
+        incident_id=incident_id
+    )
+
+    if decision == "REQUIRES_APPROVAL":
+        state["requires_approval"] = True
+        state["approval_action"] = intended_action
+        state["status"] = "PENDING_APPROVAL"
+        return "pending_approval"
+    elif decision == "BLOCKED":
+        state["status"] = "REJECTED"
+        state["requires_approval"] = False
+        return "pending_approval"
+    elif intended_action == "send_email":
         return "auto_fix"
     else:
         return "escalate"

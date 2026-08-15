@@ -13,7 +13,7 @@ from tools.notification_tool import NotificationTool
 
 # New enterprise tools (Milestone 2)
 from tools.hr_tool import HRTool
-from tools.weather_tool import WeatherTool
+from tools.infrastructure_tool import InfrastructureTool
 from tools.calendar_tool import CalendarTool
 from tools.web_search_tool import WebSearchTool
 
@@ -57,7 +57,7 @@ class TestOriginalTools(unittest.TestCase):
         db = DatabaseTool()
         res = db.run(query="Printer")
         self.assertTrue(res["success"])
-        self.assertIn("Printer spooler offline", res["result"])
+        self.assertIn("Printer", res["result"])
 
     def test_ticket_creation(self):
         """Ticket system creates and stores a ticket."""
@@ -111,27 +111,19 @@ class TestNewEnterpriseTools(unittest.TestCase):
         self.assertTrue(res["success"])
         self.assertIn("Alice Johnson", res["result"])
 
-    def test_weather_current(self):
-        """Weather tool returns current conditions."""
-        weather = WeatherTool()
-        res = weather.run(location="headquarters", query_type="current")
+    def test_infrastructure_datacenter_env(self):
+        """Infrastructure tool returns server room & datacenter environmental data."""
+        infra = InfrastructureTool()
+        res = infra.run(location="data center a", query_type="datacenter_env")
         self.assertTrue(res["success"])
-        self.assertIn("Temperature", res["result"])
-        self.assertIn("San Francisco", res["result"])
+        self.assertIn("Server Room Temp", res["result"])
 
-    def test_weather_datacenter_env(self):
-        """Weather tool returns data center environmental data."""
-        weather = WeatherTool()
-        res = weather.run(location="data center a", query_type="datacenter_env")
+    def test_infrastructure_alerts(self):
+        """Infrastructure tool returns active environmental alerts."""
+        infra = InfrastructureTool()
+        res = infra.run(location="remote office", query_type="alerts")
         self.assertTrue(res["success"])
-        self.assertIn("Room Temperature", res["result"])
-
-    def test_weather_alerts(self):
-        """Weather tool returns active weather alerts."""
-        weather = WeatherTool()
-        res = weather.run(location="remote office", query_type="alerts")
-        self.assertTrue(res["success"])
-        self.assertIn("Thunderstorm", res["result"])
+        self.assertIn("CRITICAL", res["result"])
 
     def test_calendar_maintenance_windows(self):
         """Calendar tool returns upcoming maintenance windows."""

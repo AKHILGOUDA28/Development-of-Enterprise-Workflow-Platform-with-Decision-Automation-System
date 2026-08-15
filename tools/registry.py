@@ -15,7 +15,7 @@ from tools.ticket_tool import TicketTool
 from tools.email_tool import EmailTool
 from tools.notification_tool import NotificationTool
 from tools.hr_tool import HRTool
-from tools.weather_tool import WeatherTool
+from tools.infrastructure_tool import InfrastructureTool
 from tools.calendar_tool import CalendarTool
 from tools.web_search_tool import WebSearchTool
 
@@ -25,7 +25,7 @@ class ToolRegistry:
     Central registry for enterprise tools.
     Categorizes tools:
       - Core Functional: Knowledge Base, Incident DB, Ticket System, Email, Web Search
-      - Supporting: HR, Weather, Calendar, Notification
+      - Supporting: HR, Infrastructure Monitor, Calendar, Notification
     """
 
     def __init__(self):
@@ -52,8 +52,8 @@ class ToolRegistry:
         t_hr = HRTool()
         t_hr.tool_type = "SUPPORTING"
         
-        t_wx = WeatherTool()
-        t_wx.tool_type = "SUPPORTING"
+        t_infra = InfrastructureTool()
+        t_infra.tool_type = "SUPPORTING"
         
         t_cal = CalendarTool()
         t_cal.tool_type = "SUPPORTING"
@@ -61,7 +61,7 @@ class ToolRegistry:
         t_notif = NotificationTool()
         t_notif.tool_type = "SUPPORTING"
 
-        for tool in [t_kb, t_db, t_tkt, t_email, t_web, t_hr, t_wx, t_cal, t_notif]:
+        for tool in [t_kb, t_db, t_tkt, t_email, t_web, t_hr, t_infra, t_cal, t_notif]:
             self.register(tool)
 
     def register(self, tool) -> None:
