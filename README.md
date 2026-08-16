@@ -8,6 +8,7 @@ and raises a support ticket when the issue cannot be solved.
 
 ## 🔄 Complete Agent + Tool Workflow
 
+<pre>
 Employee Reports IT Issue
           │
           ▼
@@ -78,6 +79,7 @@ RESOLVED    🔄 Retry
                   │
                   ▼
               IT Support
+</pre>
 ---
 
 ## 🤖 AI Agents
