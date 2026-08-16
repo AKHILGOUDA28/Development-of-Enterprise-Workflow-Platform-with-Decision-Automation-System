@@ -74,23 +74,7 @@ Dashboard · Notifications · Audit Log
 | Email | Sends resolution instructions via Gmail SMTP |
 | Notification | Dashboard alerts & system notifications |
 
----
 
-## 🛡️ Policy Engine
-
-Sits between every AI decision and tool execution:
-
-| Action | Policy |
-|--------|--------|
-| Send email, notification | ✅ Auto-allowed |
-| Create ticket | ✅ Auto-allowed |
-| Unlock account | ✅ Auto-allowed |
-| Disable user account | ⏳ Requires human approval |
-| Grant admin rights | ⏳ Requires human approval |
-| Delete user data | 🚫 Permanently blocked |
-| Bypass MFA | 🚫 Permanently blocked |
-
----
 
 ## 🗄️ Database Schema
 
@@ -160,29 +144,6 @@ uvicorn api:app --host 0.0.0.0 --port 8000 --reload
 ### 5. Open Dashboard
 Navigate to **http://localhost:8000** and log in.
 
----
-
-## 🐳 Docker
-
-```bash
-# Build
-docker build -t ai-incident-platform .
-
-# Run (with Supabase PostgreSQL)
-docker run -p 8000:8000 \
-  -e GROQ_API_KEY=gsk_... \
-  -e DATABASE_URL=postgresql://... \
-  -e JWT_SECRET_KEY=secret \
-  ai-incident-platform
-
-# Run (SQLite fallback)
-docker run -p 8000:8000 \
-  -e GROQ_API_KEY=gsk_... \
-  -v $(pwd)/database:/app/database \
-  ai-incident-platform
-```
-
----
 
 ## 📊 API Endpoints
 
@@ -314,19 +275,3 @@ AI-Agent-Coordination/
 └── README.md
 ```
 
----
-
-## 💡 Explaining to Your Panel
-
-**Start with the problem:**
-> "In an enterprise, IT teams receive hundreds of incidents requiring repetitive investigation. My project automates the first level of this process."
-
-**Explain the flow:**
-> "When an employee submits an incident, the system creates an incident record, plans the investigation, gathers information from enterprise data sources, analyses the evidence, makes a policy-controlled decision, and either performs an approved action or escalates to human IT support."
-
-**Key differentiator:**
-> "The LLM is not directly allowed to perform arbitrary actions. Tool access is controlled through a registry and policy layer, every action is audited, and high-risk actions require human approval. This is what makes the project production-oriented."
-
----
-
-*Built for internship demonstration — AI Agent Coordination & Decision Engine v4.0*
