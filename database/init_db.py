@@ -192,7 +192,7 @@ _TABLES = [
 # Bootstrap seed data (minimal — full data comes from database/seed.py)
 # ---------------------------------------------------------------------------
 _BOOTSTRAP_USERS = [
-    ("emp1024",   "Akhil Kumar",          "Employee",   "EMP1024", "akhil@enterprise.com",   "password123"),
+    ("emp1024",   "Akhil Gouda",          "Employee",   "EMP1024", "akhil@company.com",   "password123"),
     ("itsupport", "Alex Morgan (IT Lead)", "IT Support", "EMP8080", "support@enterprise.com", "support123"),
     ("admin",     "System Administrator", "Admin",      "EMP0001", "admin@enterprise.com",   "admin123"),
 ]
@@ -212,7 +212,7 @@ _BOOTSTRAP_DEPTS = [
 
 _BOOTSTRAP_INCIDENTS = [
     (
-        "INC-1020","INC-1020","EMP1024","Akhil Kumar",
+        "INC-1020","INC-1020","EMP1024","Akhil Gouda",
         "VPN dropped after Windows update",
         "Network","VPN","High","Medium",92.0,"AUTO-RESOLUTION",
         "IT Auto-Bot","Network Team","Reset VPN adapter and reinstall VPN profile.","Auto-Fix",
@@ -244,7 +244,7 @@ _BOOTSTRAP_INCIDENTS = [
         "2026-08-10T13:40:00Z","2026-08-10T14:00:00Z",None
     ),
     (
-        "INC-1024","INC-1024","EMP1024","Akhil Kumar",
+        "INC-1024","INC-1024","EMP1024","Akhil Gouda",
         "WiFi disconnected in conference room B",
         "Network","WiFi","Low","Low",95.0,"RESOLVED",
         "IT Auto-Bot","Network Team","Flushed DNS and reconnected.","Auto-Fix",
@@ -255,7 +255,7 @@ _BOOTSTRAP_INCIDENTS = [
 
 _BOOTSTRAP_MEMORIES = [
     ("EMP1024_history", json.dumps({
-        "employee_name": "Akhil Kumar", "department": "Engineering",
+        "employee_name": "Akhil Gouda", "department": "Engineering",
         "previous_incidents": ["VPN connection timeout","WiFi disconnect","Printer offline"],
         "successful_resolutions": {
             "VPN": "Reset network adapter MTU to 1400",
@@ -324,6 +324,13 @@ def _migrate_schema():
             "assigned_team": "TEXT",
             "resolution": "TEXT",
             "resolution_strategy": "TEXT",
+            "resolution_steps": "TEXT",
+            "resolution_attempt_count": "INTEGER DEFAULT 0",
+            "user_confirmed_resolution": "INTEGER DEFAULT 0",
+            "resolution_confirmed_at": "TEXT",
+            "escalation_reason": "TEXT",
+            "ticket_id": "TEXT",
+            "last_resolution_attempt": "TEXT",
             "resolution_time_hours": "REAL",
             "ticket_number": "TEXT",
             "resolved_at": "TEXT",
@@ -398,17 +405,22 @@ def init_databases():
     except Exception as e:
         print(f"[!] departments seed warning: {e}")
 
-    # 3. Seed users
+    # 3. Seed users & demo employee profile
     try:
-        count = db_manager.fetchone("SELECT COUNT(*) AS c FROM users")
-        if not count or int(count.get("c", 0)) == 0:
-            for u in _BOOTSTRAP_USERS:
-                db_manager.execute(
-                    "INSERT INTO users (username,name,role,employee_id,email,password) "
-                    "VALUES (?,?,?,?,?,?) ON CONFLICT(username) DO NOTHING",
-                    u
-                )
-            print("[*] Seeded users table.")
+        for u in _BOOTSTRAP_USERS:
+            db_manager.execute(
+                "INSERT INTO users (username,name,role,employee_id,email,password) "
+                "VALUES (?,?,?,?,?,?) ON CONFLICT(username) DO UPDATE SET name=EXCLUDED.name, email=EXCLUDED.email",
+                u
+            )
+        # Always ensure EMP1024 employee HR record exists with requested details
+        db_manager.execute(
+            "INSERT INTO employees (employee_id,name,email,department,title,manager,phone,location,hire_date,is_vip,created_at) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(employee_id) DO UPDATE SET "
+            "name=EXCLUDED.name, email=EXCLUDED.email, manager=EXCLUDED.manager, location=EXCLUDED.location, department=EXCLUDED.department",
+            ("EMP1024", "Akhil Gouda", "akhil@company.com", "Engineering", "Software Engineer", "Karthik", "+91 98765 43210", "Hyderabad", "2024-01-15", 1, now)
+        )
+        print("[*] Seeded/updated users and demo employee table.")
     except Exception as e:
         print(f"[!] users seed warning: {e}")
 

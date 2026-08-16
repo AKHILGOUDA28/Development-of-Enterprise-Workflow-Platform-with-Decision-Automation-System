@@ -50,11 +50,11 @@ def verify_token(credentials: Optional[HTTPAuthorizationCredentials] = Depends(s
     if not credentials:
         # Default fallback to Guest/Employee if token omitted in basic mode
         return {
-            "username": "guest",
-            "name": "Employee User",
+            "username": "emp1024",
+            "name": "Akhil Gouda",
             "role": "Employee",
             "employee_id": "EMP1024",
-            "email": "user@enterprise.com"
+            "email": "akhil@company.com"
         }
     token = credentials.credentials
     try:

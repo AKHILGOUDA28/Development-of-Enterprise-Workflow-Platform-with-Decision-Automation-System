@@ -14,7 +14,7 @@ from memory import long_memory
 from tracing import tracer
 from agent_bus import bus
 
-def get_mock_research(query: str, emp_id: str = "EMP1024") -> str:
+def get_mock_research(query: str, emp_id: str = "EMP1024", previous_attempts: list = None) -> str:
     emp_mem = long_memory.recall(f"{emp_id}_history")
     history_note = ""
     if emp_mem:
@@ -24,39 +24,67 @@ def get_mock_research(query: str, emp_id: str = "EMP1024") -> str:
         except Exception:
             pass
 
+    retry_note = ""
+    if previous_attempts:
+        retry_note = f"\n\n⚠ RETRY CONTEXT: The following solutions were already attempted and FAILED. Do NOT repeat them:\n"
+        for i, attempt in enumerate(previous_attempts, 1):
+            retry_note += f"  Attempt {i}: {attempt}\n"
+        retry_note += "Find an ALTERNATIVE root cause and resolution path."
+
     return f"""Research Findings:
 
 1. Query Analyzed: "{query}"
-2. Knowledge Base match found: Checked 42 enterprise records. Matching solution available.
+2. Knowledge Base match found: Checked 42 enterprise records. Alternative resolution path identified.{retry_note}
 3. Historical Incident DB: Queried incidents table for matching resolution patterns.{history_note}
 
 Key Points:
-- Knowledge base confirms step-by-step resolution path exists.
+- Knowledge base confirms {'alternative ' if previous_attempts else ''}step-by-step resolution path exists.
 - Past incidents show 92% first-contact resolution success rate.
 - Employee historical context retrieved from long-term memory."""
 
 def researcher_agent(state: dict) -> dict:
     start_time = time.monotonic()
     tracer.log_event("Research Agent", "Starting IT Support Research with Native Tool Calling")
-    session_id = state.get("session_id", "global")
-    emp_id = state.get("employee_id", "EMP1024")
+    session_id      = state.get("session_id", "global")
+    emp_id          = state.get("employee_id", "EMP1024")
+    previous_attempts = state.get("previous_resolution_attempts") or []
+    attempt_count   = state.get("resolution_attempt_count", 0)
 
     bus.publish(
         publisher="researcher_agent",
         event_type="research_started",
-        payload={"query": state.get("query", "")[:120], "employee_id": emp_id},
+        payload={
+            "query": state.get("query", "")[:120],
+            "employee_id": emp_id,
+            "is_retry": bool(previous_attempts),
+            "attempt": attempt_count + 1
+        },
         session_id=session_id
     )
 
-    # Automatically query employee history from SQLite LongTermMemory
+    # Automatically query employee history from long-term memory
     emp_history_str = ""
     emp_mem = long_memory.recall(f"{emp_id}_history")
     if emp_mem:
-        emp_history_str = f"\n\n[Employee Historical Context from Long-Term Memory ({emp_id})]:\n{emp_mem}"
+        emp_history_str = f"\n\n[Employee Historical Context ({emp_id})]:\n{emp_mem}"
+
+    # Build previous-attempts context string for retry runs
+    retry_context_str = ""
+    if previous_attempts:
+        retry_context_str = (
+            f"\n\n[RETRY INVESTIGATION — Attempt {attempt_count + 1}]\n"
+            f"The following solutions were already provided to the employee and FAILED:\n"
+        )
+        for i, attempt in enumerate(previous_attempts, 1):
+            retry_context_str += f"  Attempt {i}: {attempt}\n"
+        retry_context_str += (
+            "\nDo NOT suggest the same resolution again. "
+            "Search for an ALTERNATIVE root cause and a different remediation path."
+        )
 
     if config.IS_MOCK or not config.llm:
-        state["research"] = get_mock_research(state["query"], emp_id)
-        elapsed = round((time.monotonic() - start_time), 2)
+        state["research"] = get_mock_research(state["query"], emp_id, previous_attempts or None)
+        elapsed = round(time.monotonic() - start_time, 2)
         state.setdefault("timings", {})["researcher"] = elapsed
         bus.publish(
             publisher="researcher_agent",
@@ -73,12 +101,19 @@ def researcher_agent(state: dict) -> dict:
 
         sys_prompt = SystemMessage(content=(
             "You are an IT Support Research Agent.\n"
-            "Your goal is to gather facts from the knowledge base, incident database, and web search to resolve the user's issue.\n"
-            "Use native tool calls to query `knowledge_base`, `incident_database`, `web_search`, or `hr_system`.\n"
-            "After gathering facts, output your final 'Research Findings:' and 'Key Points:'."
+            "Your goal is to gather evidence from available tools to help diagnose the employee's IT issue.\n"
+            "Dynamically decide which tools to call based on what evidence is needed — do NOT call all tools blindly.\n"
+            "Available tools: knowledge_base, incident_database, infrastructure_monitor, calendar_system, hr_system, web_search.\n"
+            "After gathering facts, output structured 'Research Findings:' with key evidence points.\n"
+            + (f"IMPORTANT: Previous solutions have FAILED. Find an ALTERNATIVE resolution.{retry_context_str}" if retry_context_str else "")
         ))
 
-        user_content = f"User Question: {state['query']}\nPlan:\n{state['plan']}{emp_history_str}"
+        user_content = (
+            f"User Question: {state['query']}\n"
+            f"Investigation Plan:\n{state['plan']}"
+            f"{emp_history_str}"
+            f"{retry_context_str}"
+        )
         messages = [sys_prompt, HumanMessage(content=user_content)]
 
         max_iterations = 4

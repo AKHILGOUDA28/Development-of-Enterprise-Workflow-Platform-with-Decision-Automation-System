@@ -161,7 +161,7 @@ def seed_employees():
 
     # Ensure core admin users exist
     for uname, uname_full, role, emp_id, email, pwd in [
-        ("emp1024", "Akhil Kumar", "Employee", "EMP1000", "akhil.kumar@enterprise.com", "password123"),
+        ("emp1024", "Akhil Gouda", "Employee", "EMP1024", "akhil@company.com", "password123"),
         ("itsupport","Alex Morgan (IT Lead)","IT Support","EMP8080","support@enterprise.com","support123"),
         ("admin","System Administrator","Admin","EMP0001","admin@enterprise.com","admin123"),
     ]:

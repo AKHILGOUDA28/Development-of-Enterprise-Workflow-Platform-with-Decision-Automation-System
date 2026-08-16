@@ -29,10 +29,25 @@ class KnowledgeTool(BaseTool):
         results = []
         for item in kb:
             if query_lower in item["issue"].lower() or any(query_lower in sol.lower() for sol in item["solution"]):
-                results.append(f"Issue: {item['issue']}\nSolution:\n- " + "\n- ".join(item['solution']))
+                causes = ", ".join(item.get("known_causes", []))
+                syms = ", ".join(item.get("symptoms", []))
+                steps = "\n- ".join(item.get("solution", []))
+                
+                art_str = (
+                    f"Article ID: {item.get('id', 'N/A')}\n"
+                    f"Category: {item.get('category', 'N/A')}\n"
+                    f"Issue: {item.get('issue', 'N/A')}\n"
+                    f"Symptoms: {syms}\n"
+                    f"Known Causes: {causes}\n"
+                    f"Solution Steps:\n- {steps}\n"
+                    f"Historical Success: {item.get('historical_success_count', 0)} incidents\n"
+                    f"Success Rate: {item.get('success_rate_pct', 0)}%\n"
+                    f"Average Confidence: {item.get('avg_confidence_pct', 0)}%"
+                )
+                results.append(art_str)
         
         if results:
-            res_str = "\n\n".join(results)
+            res_str = "\n\n=== MATCHED KB ARTICLES ===\n\n" + "\n\n-------------------------\n\n".join(results)
         else:
             res_str = "No matching solutions found in the knowledge base."
             

@@ -379,6 +379,7 @@
     
     <nav class="sidebar-nav" id="navSection">
       <div class="nav-label" id="lbl-core">Core</div>
+      <div class="nav-item" onclick="switchTab('emp-dashboard')" id="nav-emp-dashboard" style="display:none"><i class="fa-solid fa-table-columns"></i> Dashboard</div>
       <div class="nav-item active" onclick="switchTab('overview')" id="nav-overview"><i class="fa-solid fa-chart-pie"></i> Overview</div>
       <div class="nav-item" onclick="switchTab('incidents')" id="nav-incidents"><i class="fa-solid fa-ticket"></i> Incidents <span class="nav-badge" id="openBadge">&mdash;</span></div>
       <div class="nav-item" onclick="switchTab('submit')" id="nav-submit"><i class="fa-solid fa-plus"></i> Report Issue</div>
@@ -423,6 +424,62 @@
     </div>
 
     <div class="content">
+
+      <!-- EMPLOYEE DASHBOARD LANDING PAGE -->
+      <div class="tab-panel" id="tab-emp-dashboard">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin-bottom:20px;box-shadow:var(--shadow-sm);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
+          <div>
+            <h2 style="font-size:1.35rem;font-weight:800;color:var(--text);margin-bottom:4px">Welcome, <span id="dashEmpFirstName">Akhil</span></h2>
+            <p style="font-size:0.85rem;color:var(--text-2)">How can we help you today?</p>
+          </div>
+          <button class="btn btn-primary" onclick="switchTab('submit')" style="padding:10px 18px;font-weight:600"><i class="fa-solid fa-plus"></i> Report Issue</button>
+        </div>
+
+        <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom:24px;">
+          <div class="kpi-card amber">
+            <div class="kpi-label">Open</div>
+            <div class="kpi-value" id="empOpenCount">0</div>
+            <div class="kpi-sub">Active support requests</div>
+          </div>
+          <div class="kpi-card blue">
+            <div class="kpi-label">Pending</div>
+            <div class="kpi-value" id="empPendingCount">0</div>
+            <div class="kpi-sub">Awaiting review or action</div>
+          </div>
+          <div class="kpi-card emerald">
+            <div class="kpi-label">Resolved</div>
+            <div class="kpi-value" id="empResolvedCount">0</div>
+            <div class="kpi-sub">Completed & closed</div>
+          </div>
+        </div>
+
+        <div class="charts-grid" style="grid-template-columns: 2fr 1fr; gap:16px; margin-bottom:24px;">
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title" style="font-size:0.95rem;font-weight:700">Recent Incidents</div>
+                <div class="chart-sub">Your latest reported IT issues</div>
+              </div>
+              <button class="btn btn-sm" onclick="switchTab('incidents')">View All</button>
+            </div>
+            <div id="empRecentIncidentsList" style="display:flex;flex-direction:column;gap:8px">
+              <div style="color:var(--text-3);font-size:0.78rem;padding:12px;text-align:center">Loading recent incidents...</div>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title" style="font-size:0.95rem;font-weight:700">Current Notifications</div>
+                <div class="chart-sub">Status updates & alerts</div>
+              </div>
+            </div>
+            <div id="empNotificationsList" style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto">
+              <div style="color:var(--text-3);font-size:0.78rem;padding:12px;text-align:center">No new notifications</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- IT OPERATIONS OVERVIEW -->
       <div class="tab-panel active" id="tab-overview">
@@ -538,11 +595,23 @@
 
       <!-- KNOWLEDGE BASE -->
       <div class="tab-panel" id="tab-knowledge">
-        <div class="section-header" style="margin-bottom:16px"><div><div class="section-title" style="font-size:1.1rem;font-weight:700">Knowledge Base</div><div class="section-sub" style="font-size:0.75rem;color:var(--text-2)">IT resolution articles</div></div></div>
+        <div class="section-header" style="margin-bottom:16px"><div><div class="section-title" style="font-size:1.1rem;font-weight:700">Knowledge Base</div><div class="section-sub" style="font-size:0.75rem;color:var(--text-2)">Self-service IT troubleshooting articles</div></div></div>
         <div class="table-toolbar" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;box-shadow:var(--shadow-sm)">
-          <div class="search-box" style="max-width:400px"><span><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" id="kbSearch" placeholder="Search articles..." oninput="searchKB()"></div>
+          <div class="search-box" style="max-width:400px"><span><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" id="kbSearch" placeholder="Search VPN, Wi-Fi, password..." oninput="searchKB()"></div>
           <select class="filter-select" id="kbCatFilter" onchange="searchKB()"><option value="">All Categories</option><option>Network</option><option>Email</option><option>Security</option><option>Hardware</option><option>Software</option><option>Access</option><option>IT Operations</option></select>
         </div>
+
+        <div style="margin-bottom:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow-sm)">
+          <div style="font-size:0.8rem;font-weight:700;color:var(--text);margin-bottom:10px">Popular Articles</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <button class="btn btn-sm" onclick="quickSearchKB('VPN Connection Troubleshooting')">📘 VPN Connection Troubleshooting</button>
+            <button class="btn btn-sm" onclick="quickSearchKB('Reset Your Windows Password')">📘 Reset Your Windows Password</button>
+            <button class="btn btn-sm" onclick="quickSearchKB('Wi-Fi Connection')">📘 Wi-Fi Connection Problems</button>
+            <button class="btn btn-sm" onclick="quickSearchKB('Outlook')">📘 Outlook Not Syncing</button>
+            <button class="btn btn-sm" onclick="quickSearchKB('Printer')">📘 Printer Troubleshooting</button>
+          </div>
+        </div>
+
         <div class="kb-grid" id="kbGrid"><div class="empty-state" style="grid-column:1/-1">Loading knowledge base...</div></div>
       </div>
 
@@ -581,21 +650,22 @@
         <div class="submit-card" style="max-width:600px">
           <div class="submit-header">
             <div style="display:flex;align-items:center;gap:16px">
-              <div class="user-avatar" style="width:48px;height:48px;font-size:1.2rem" id="profAvatar">?</div>
+              <div class="user-avatar" style="width:48px;height:48px;font-size:1.2rem" id="profAvatar">AG</div>
               <div>
-                <div class="submit-title" id="profName">Akhil Kumar</div>
-                <div class="submit-sub" id="profTitle">Senior Software Engineer</div>
+                <div class="submit-title" id="profName">Akhil Gouda</div>
+                <div class="submit-sub" id="profTitle">Software Engineer</div>
               </div>
             </div>
           </div>
           <div class="submit-body">
             <div class="detail-grid">
+              <div><div class="detail-label">Name</div><div class="detail-value" id="profFullName">Akhil Gouda</div></div>
               <div><div class="detail-label">Employee ID</div><div class="detail-value td-mono" id="profId">EMP1024</div></div>
               <div><div class="detail-label">Department</div><div class="detail-value" id="profDept">Engineering</div></div>
-              <div><div class="detail-label">Corporate Email</div><div class="detail-value" id="profEmail">akhil@enterprise.com</div></div>
-              <div><div class="detail-label">Reporting Manager</div><div class="detail-value" id="profManager">Alex Morgan</div></div>
-              <div><div class="detail-label">Office Location</div><div class="detail-value" id="profLoc">Building A, Floor 3</div></div>
-              <div><div class="detail-label">Hire Date</div><div class="detail-value" id="profHire">2023-03-15</div></div>
+              <div><div class="detail-label">Role</div><div class="detail-value" id="profRole">Employee</div></div>
+              <div><div class="detail-label">Corporate Email</div><div class="detail-value" id="profEmail">akhil@company.com</div></div>
+              <div><div class="detail-label">Office Location</div><div class="detail-value" id="profLoc">Hyderabad</div></div>
+              <div><div class="detail-label">Reporting Manager</div><div class="detail-value" id="profManager">Karthik</div></div>
             </div>
             <div style="margin-top:20px;padding:10px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;font-size:0.72rem;color:var(--text-2)">
               ℹ Sensitive HR & organizational profile attributes are read-only. Contact HR Operations for changes.
@@ -734,6 +804,7 @@ async function api(path, opts={}) {
 function toast(msg, type='info') { const el = document.getElementById('toast'); el.textContent = msg; el.className = `toast ${type} show`; setTimeout(() => { el.className = 'toast'; }, 3500); }
 
 const TAB_META = {
+  'emp-dashboard': { title: 'Enterprise IT Service Portal', sub: 'Employee Self-Service Dashboard' },
   overview:  { title: 'IT Operations Overview', sub: 'Real-time metrics & incident performance' },
   incidents: { title: 'Incident Tracking',       sub: 'Filter & investigate system incidents' },
   submit:    { title: 'Report IT Issue',          sub: 'Describe your issue & trigger automated AI triage' },
@@ -772,6 +843,7 @@ function refreshCurrentTab() { loadTab(activeTab); }
 
 function loadTab(tab) {
   switch(tab) {
+    case 'emp-dashboard': loadEmpDashboard(); break;
     case 'overview':  loadOverview(); break;
     case 'incidents': loadIncidents(); break;
     case 'profile':   loadProfile(); break;
@@ -783,6 +855,71 @@ function loadTab(tab) {
     case 'audit':     AUDIT_OFFSET = 0; loadAuditLogs(); break;
     case 'policy':    loadPolicy(); break;
     case 'users':     loadUsers(); break;
+  }
+}
+
+function formatConfidence(conf) {
+  if (typeof conf === 'string' && !isNaN(parseFloat(conf))) conf = parseFloat(conf);
+  if (typeof conf !== 'number' || isNaN(conf)) return 'High';
+  if (conf >= 85) return 'High';
+  if (conf >= 70) return 'Medium';
+  return 'Low';
+}
+
+function quickSearchKB(q) {
+  const el = document.getElementById('kbSearch');
+  if (el) { el.value = q; searchKB(); }
+}
+
+async function loadEmpDashboard() {
+  const empName = CURRENT_USER.name || 'Akhil Gouda';
+  const nameEl = document.getElementById('dashEmpFirstName');
+  if (nameEl) nameEl.textContent = empName.split(' ')[0];
+
+  try {
+    const incidents = await api('/incidents?limit=100');
+    const openCount = incidents.filter(i => ['NEW', 'INVESTIGATING', 'OPEN'].includes(i.status)).length;
+    const pendingCount = incidents.filter(i => i.status === 'PENDING_APPROVAL').length;
+    const resolvedCount = incidents.filter(i => ['AUTO-RESOLUTION', 'RESOLVED'].includes(i.status)).length;
+
+    document.getElementById('empOpenCount').textContent = openCount;
+    document.getElementById('empPendingCount').textContent = pendingCount;
+    document.getElementById('empResolvedCount').textContent = resolvedCount;
+
+    const recentListEl = document.getElementById('empRecentIncidentsList');
+    if (!incidents || incidents.length === 0) {
+      recentListEl.innerHTML = '<div style="color:var(--text-3);font-size:0.78rem;padding:12px;text-align:center">No incidents submitted yet</div>';
+    } else {
+      recentListEl.innerHTML = incidents.slice(0, 5).map(inc => `
+        <div onclick="openDetail('${inc.incident_id}')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all var(--transition)">
+          <div>
+            <div style="font-size:0.8rem;font-weight:700;color:var(--text)"><span class="td-mono">${inc.incident_number || inc.incident_id}</span> &nbsp; ${truncate(inc.issue, 40)}</div>
+            <div style="font-size:0.7rem;color:var(--text-3);margin-top:2px">${fmtDate(inc.created_at)}</div>
+          </div>
+          <div>${statusBadge(inc.status)}</div>
+        </div>
+      `).join('');
+    }
+
+    const notifListEl = document.getElementById('empNotificationsList');
+    const notifs = await api('/notifications?limit=10').catch(() => []);
+    if (!notifs || notifs.length === 0) {
+      notifListEl.innerHTML = `
+        <div style="padding:10px 12px;background:var(--surface-2);border-radius:8px;font-size:0.75rem;color:var(--text-2);border:1px solid var(--border)">
+          <div style="font-weight:600;color:var(--emerald);margin-bottom:2px">✓ All systems operational</div>
+          <div>No pending alerts or notifications for your account.</div>
+        </div>
+      `;
+    } else {
+      notifListEl.innerHTML = notifs.map(n => `
+        <div style="padding:10px 12px;background:var(--surface-2);border-radius:8px;font-size:0.75rem;color:var(--text-2);border:1px solid var(--border)">
+          <div style="font-weight:600;color:var(--text);margin-bottom:2px">${n.message}</div>
+          <div style="font-size:0.65rem;color:var(--text-3);margin-top:4px">${fmtDate(n.sent_at)}</div>
+        </div>
+      `).join('');
+    }
+  } catch (e) {
+    console.error('Error loading employee dashboard:', e);
   }
 }
 
@@ -820,6 +957,7 @@ async function loadOverview() {
 function applyRolePermissions() {
   const role = (CURRENT_USER.role || 'Employee').trim();
 
+  const navEmpDash   = document.getElementById('nav-emp-dashboard');
   const navOverview  = document.getElementById('nav-overview');
   const navIncidents = document.getElementById('nav-incidents');
   const navSubmit    = document.getElementById('nav-submit');
@@ -839,14 +977,16 @@ function applyRolePermissions() {
   const lblGovernance   = document.getElementById('lbl-governance');
 
   if (role === 'Employee') {
-    if(lblCore) lblCore.textContent = 'Employee Portal';
+    if(lblCore) { lblCore.style.display = 'block'; lblCore.textContent = 'Employee Portal'; }
     if(lblIntelligence) lblIntelligence.style.display = 'none';
     if(lblGovernance)   lblGovernance.style.display   = 'none';
 
+    if(navEmpDash)   navEmpDash.style.display   = 'none';
     if(navOverview)  navOverview.style.display  = 'none';
     if(navApproval)  navApproval.style.display  = 'none';
     if(navWorkflow)  navWorkflow.style.display  = 'none';
     if(navTools)     navTools.style.display     = 'none';
+    if(navKnowledge) navKnowledge.style.display = 'none';
     if(navMemory)    navMemory.style.display    = 'none';
     if(navAudit)     navAudit.style.display     = 'none';
     if(navPolicy)    navPolicy.style.display    = 'none';
@@ -855,46 +995,46 @@ function applyRolePermissions() {
 
     if(navSubmit)    navSubmit.style.display    = 'flex';
     if(navProfile)   navProfile.style.display   = 'flex';
-    if(navKnowledge) navKnowledge.style.display = 'flex';
     if(navIncidents) {
       navIncidents.style.display = 'flex';
       navIncidents.innerHTML = '<i class="fa-solid fa-list-ul"></i> My Incidents';
     }
     
     document.getElementById('incidentsTitle').textContent = 'My Incidents';
-    switchTab('submit');
+    switchTab('submit'); // Default Employee page is the issue submission page
   } else if (role === 'IT Support') {
-    if(lblCore) lblCore.textContent = 'Operations';
-    if(lblIntelligence) { lblIntelligence.style.display = 'block'; lblIntelligence.textContent = 'Monitoring'; }
-    if(lblGovernance)   { lblGovernance.style.display   = 'block'; lblGovernance.textContent   = 'Governance'; }
+    if(lblCore) { lblCore.style.display = 'block'; lblCore.textContent = 'IT Support Portal'; }
+    if(lblIntelligence) lblIntelligence.style.display = 'none';
+    if(lblGovernance)   lblGovernance.style.display   = 'none';
 
+    if(navEmpDash)   navEmpDash.style.display   = 'none';
     if(navOverview)  navOverview.style.display  = 'flex';
-    if(navSubmit)    navSubmit.style.display    = 'flex';
+    if(navSubmit)    navSubmit.style.display    = 'none';
     if(navProfile)   navProfile.style.display   = 'flex';
-    if(navWorkflow)  navWorkflow.style.display  = 'flex';
-    if(navTools)     navTools.style.display     = 'flex';
-    if(navKnowledge) navKnowledge.style.display = 'flex';
-    if(navMemory)    navMemory.style.display    = 'flex';
-    if(navAudit)     navAudit.style.display     = 'flex';
-    if(navPolicy)    navPolicy.style.display    = 'flex';
+    if(navWorkflow)  navWorkflow.style.display  = 'none';
+    if(navTools)     navTools.style.display     = 'none';
+    if(navMemory)    navMemory.style.display    = 'none';
+    if(navAudit)     navAudit.style.display     = 'none';
+    if(navPolicy)    navPolicy.style.display    = 'none';
+    if(navUsers)     navUsers.style.display     = 'none';
+    if(navSettings)  navSettings.style.display  = 'none';
 
+    if(navKnowledge) navKnowledge.style.display = 'flex';
+    if(navApproval)  navApproval.style.display  = 'flex';
     if(navIncidents) {
       navIncidents.style.display = 'flex';
       navIncidents.innerHTML = '<i class="fa-solid fa-ticket"></i> All Incidents <span class="nav-badge" id="openBadge">&mdash;</span>';
     }
 
     document.getElementById('incidentsTitle').textContent = 'All Incidents';
-    if(navApproval) navApproval.style.display = 'none';
-    if(navUsers)    navUsers.style.display    = 'none';
-    if(navSettings) navSettings.style.display = 'none';
-
-    switchTab('overview');
+    switchTab('overview'); // Default page for IT support is the operational overview
   } else {
     // Admin
-    if(lblCore) lblCore.textContent = 'Core Platform';
+    if(lblCore) { lblCore.style.display = 'block'; lblCore.textContent = 'Core Platform'; }
     if(lblIntelligence) { lblIntelligence.style.display = 'block'; lblIntelligence.textContent = 'Intelligence'; }
     if(lblGovernance)   { lblGovernance.style.display   = 'block'; lblGovernance.textContent   = 'System Control'; }
 
+    if(navEmpDash) navEmpDash.style.display = 'none';
     [navOverview, navIncidents, navSubmit, navProfile, navApproval, navWorkflow, navTools, navKnowledge, navMemory, navAudit, navPolicy, navUsers, navSettings].forEach(el => {
       if(el) el.style.display = 'flex';
     });
@@ -910,15 +1050,17 @@ function applyRolePermissions() {
 async function loadProfile() {
   try {
     const prof = await api('/profile');
-    document.getElementById('profName').textContent = prof.name || CURRENT_USER.name || 'Akhil Kumar';
-    document.getElementById('profTitle').textContent = prof.title || 'Senior Software Engineer';
+    const name = prof.name || CURRENT_USER.name || 'Akhil Gouda';
+    document.getElementById('profName').textContent = name;
+    if (document.getElementById('profFullName')) document.getElementById('profFullName').textContent = name;
+    document.getElementById('profTitle').textContent = prof.title || 'Software Engineer';
     document.getElementById('profId').textContent = prof.employee_id || CURRENT_USER.employee_id || 'EMP1024';
     document.getElementById('profDept').textContent = prof.department || 'Engineering';
-    document.getElementById('profEmail').textContent = prof.email || CURRENT_USER.email || 'akhil@enterprise.com';
-    document.getElementById('profManager').textContent = prof.manager || 'Alex Morgan';
-    document.getElementById('profLoc').textContent = prof.location || 'Building A, Floor 3';
-    document.getElementById('profHire').textContent = prof.hire_date || '2023-03-15';
-    document.getElementById('profAvatar').textContent = (prof.name || 'Akhil').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+    if (document.getElementById('profRole')) document.getElementById('profRole').textContent = prof.role || CURRENT_USER.role || 'Employee';
+    document.getElementById('profEmail').textContent = prof.email || CURRENT_USER.email || 'akhil@company.com';
+    document.getElementById('profManager').textContent = prof.manager || 'Karthik';
+    document.getElementById('profLoc').textContent = prof.location || 'Hyderabad';
+    document.getElementById('profAvatar').textContent = name.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
   } catch(e) { console.error(e); }
 }
 
@@ -1005,32 +1147,155 @@ async function openDetail(incId) {
     resEl.style.display = 'none';
   }
 
-  document.getElementById('detailGrid').innerHTML = `
-    <div class="detail-field"><div class="detail-label">Status</div><div class="detail-value">${statusBadge(inc.status)}</div></div>
-    <div class="detail-field"><div class="detail-label">Severity</div><div class="detail-value">${severityBadge(inc.severity)}</div></div>
-    <div class="detail-field"><div class="detail-label">Employee</div><div class="detail-value">${inc.employee_name || inc.employee_id}</div></div>
-    <div class="detail-field"><div class="detail-label">Assigned To</div><div class="detail-value">${inc.assigned_to || 'N/A'}</div></div>
-    <div class="detail-field"><div class="detail-label">Confidence</div><div class="detail-value">${inc.confidence ? inc.confidence.toFixed(1) + '%' : 'N/A'}</div></div>
-    <div class="detail-field"><div class="detail-label">Priority</div><div class="detail-value">${inc.priority || 'N/A'}</div></div>
-    <div class="detail-field"><div class="detail-label">Ticket Number</div><div class="detail-value td-mono">${inc.ticket_number || 'N/A'}</div></div>
-  `;
-
-  // Hide AI Workflow internal reasoning for Employees
-  const wfSec = document.getElementById('detailAIWorkflowSection');
   if (CURRENT_USER.role === 'Employee') {
-    if (wfSec) wfSec.style.display = 'none';
-  } else {
-    if (wfSec) {
-      wfSec.style.display = 'block';
-      const toolsCalled = 4; // Mock standard execution
-      document.getElementById('detailAIWorkflowSteps').innerHTML = `
-        <div class="progress-step"><div class="progress-step-icon step-done"><i class="fa-solid fa-check"></i></div><div><div style="font-weight:600">Planner Agent</div><div style="font-size:0.68rem;color:var(--text-3)">Created investigation roadmap</div></div></div>
-        <div class="progress-step"><div class="progress-step-icon step-done"><i class="fa-solid fa-check"></i></div><div><div style="font-weight:600">Researcher Agent</div><div style="font-size:0.68rem;color:var(--text-3)">Used ${toolsCalled} enterprise tools to query context</div></div></div>
-        <div class="progress-step"><div class="progress-step-icon step-done"><i class="fa-solid fa-check"></i></div><div><div style="font-weight:600">Analysis Agent</div><div style="font-size:0.68rem;color:var(--text-3)">Confidence: ${inc.confidence ? inc.confidence.toFixed(0) + '%' : '92%'}</div></div></div>
-        <div class="progress-step"><div class="progress-step-icon step-done"><i class="fa-solid fa-check"></i></div><div><div style="font-weight:600">Decision Agent</div><div style="font-size:0.68rem;color:var(--text-3)">Decision lifecycle routing: ${inc.status}</div></div></div>
-        <div class="progress-step"><div class="progress-step-icon step-done"><i class="fa-solid fa-check"></i></div><div><div style="font-weight:600">Executor Agent</div><div style="font-size:0.68rem;color:var(--text-3)">Final response synthesized and logged</div></div></div>
+    const confLabel = formatConfidence(inc.confidence);
+    const confPct    = inc.confidence ? Math.round(inc.confidence) : 91;
+    const submittedDate = fmtDate(inc.created_at).split(',')[0] || fmtDate(new Date().toISOString()).split(',')[0];
+    const isAwaiting = ['AWAITING_USER_CONFIRMATION', 'GUIDED_RESOLUTION'].includes(inc.status);
+    const isResolved  = inc.status === 'RESOLVED';
+    const isEscalated = ['ESCALATED', 'ESCALATION'].includes(inc.status);
+    const isInvestigating = inc.status === 'INVESTIGATING';
+
+    // Parse resolution steps from the incident record
+    let resSteps = [];
+    if (inc.resolution_steps) {
+      try {
+        resSteps = typeof inc.resolution_steps === 'string'
+          ? JSON.parse(inc.resolution_steps)
+          : inc.resolution_steps;
+      } catch(e) { resSteps = [inc.resolution_steps]; }
+    }
+    const resTitle   = inc.resolution_strategy || (inc.category ? `${inc.category} Issue Resolution` : 'IT Issue Resolution');
+    const attemptNum = parseInt(inc.resolution_attempt_count) || 1;
+
+    // Build numbered resolution steps HTML
+    const stepsHtml = resSteps.length > 0
+      ? `<ol style="margin:0;padding-left:20px;line-height:2">${resSteps.map(s => `<li style="font-size:0.83rem;color:var(--text-2)">${s}</li>`).join('')}</ol>`
+      : `<div style="font-size:0.83rem;color:var(--text-2);line-height:1.7">${inc.resolution || 'Please follow the recommended steps provided in your email.'}</div>`;
+
+    let outcomeHtml = '';
+    if (isAwaiting) {
+      outcomeHtml = `
+        <div id="guidedContainer-${inc.incident_id}" style="background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:22px;margin-top:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div style="font-size:1.05rem;font-weight:800;color:var(--text)">🔍 AI Investigation Complete</div>
+            <span class="badge badge-pending" style="font-size:0.65rem">AWAITING YOUR CONFIRMATION</span>
+          </div>
+
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:16px">
+            <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;color:var(--text-3);margin-bottom:4px">AI Root Cause</div>
+            <div style="font-size:0.95rem;font-weight:700;color:var(--text)">${resTitle}</div>
+            <div style="font-size:0.72rem;color:var(--blue);font-weight:700;margin-top:3px">AI Confidence: ${confLabel} (${confPct}%)${attemptNum > 1 ? ' &nbsp;•&nbsp; Attempt #' + attemptNum : ''}</div>
+          </div>
+
+          <div style="font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:8px">📋 Recommended Steps</div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:20px">
+            ${stepsHtml}
+          </div>
+
+          <div style="font-size:0.83rem;color:var(--text-2);margin-bottom:14px;font-style:italic">Please try the steps above, then confirm below:</div>
+
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <button onclick="confirmResolutionNew('${inc.incident_id}', true)" style="background:var(--emerald);color:#fff;font-weight:700;padding:11px 24px;border-radius:8px;border:none;cursor:pointer;font-size:0.88rem;display:flex;align-items:center;gap:8px">
+              <i class="fa-solid fa-circle-check"></i> Yes, It&apos;s Fixed!
+            </button>
+            <button onclick="confirmResolutionNew('${inc.incident_id}', false)" style="background:var(--surface);color:var(--text);font-weight:600;padding:11px 24px;border-radius:8px;border:1px solid var(--border);cursor:pointer;font-size:0.88rem;display:flex;align-items:center;gap:8px">
+              <i class="fa-solid fa-circle-xmark"></i> No, Still Not Working
+            </button>
+          </div>
+        </div>
+      `;
+    } else if (isInvestigating) {
+      outcomeHtml = `
+        <div style="background:var(--surface-2);border:1px solid var(--amber,#f59e0b);border-radius:14px;padding:22px;margin-top:16px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--amber,#f59e0b);color:#fff;display:flex;align-items:center;justify-content:center"><i class="fa-solid fa-arrows-rotate"></i></div>
+            <div>
+              <div style="font-size:1.05rem;font-weight:800;color:var(--text)">AI Agents Investigating Alternative Solution</div>
+              <div style="font-size:0.75rem;color:var(--amber,#f59e0b);font-weight:600">INVESTIGATING — Attempt ${attemptNum}</div>
+            </div>
+          </div>
+          <div style="font-size:0.83rem;color:var(--text-2);line-height:1.6">We're sorry the previous solution didn't work. Our AI agents are now searching for an alternative approach. Please check back in a moment.</div>
+        </div>
+      `;
+    } else if (isResolved) {
+      outcomeHtml = `
+        <div style="background:var(--surface-2);border:1px solid var(--emerald);border-radius:14px;padding:22px;margin-top:16px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--emerald);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.1rem"><i class="fa-solid fa-check"></i></div>
+            <div>
+              <div style="font-size:1.05rem;font-weight:800;color:var(--text)">Incident ${inc.incident_number || incId} — RESOLVED ✅</div>
+              <div style="font-size:0.75rem;color:var(--emerald);font-weight:600">Resolution confirmed by employee — No IT ticket needed</div>
+            </div>
+          </div>
+          <div style="font-size:0.83rem;color:var(--text-2);line-height:1.6">Great — thank you for confirming! Your issue has been marked as resolved. The verified resolution has been saved to our AI knowledge base to help future employees with similar issues.</div>
+        </div>
+      `;
+    } else if (isEscalated) {
+      const tktNum = inc.ticket_number || inc.ticket_id || 'TKT-XXXXX';
+      outcomeHtml = `
+        <div style="background:var(--surface-2);border:1px solid var(--rose);border-radius:14px;padding:22px;margin-top:16px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--rose);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.1rem">🎫</div>
+            <div>
+              <div style="font-size:1.05rem;font-weight:800;color:var(--text)">IT Support Ticket Created: ${tktNum}</div>
+              <div style="font-size:0.75rem;color:var(--rose);font-weight:600">ESCALATED TO IT SUPPORT</div>
+            </div>
+          </div>
+          <div style="font-size:0.83rem;color:var(--text-2);line-height:1.7;margin-bottom:14px">Your issue could not be resolved using AI-guided troubleshooting. An IT Support Technician has been assigned your ticket with the complete investigation attached.</div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+            <div style="font-size:0.68rem;font-weight:700;color:var(--text-3);text-transform:uppercase;margin-bottom:10px">IT Support received:</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="font-size:0.8rem;color:var(--text-2)"><i class="fa-solid fa-check" style="color:var(--emerald);margin-right:8px"></i>Your original issue description</div>
+              <div style="font-size:0.8rem;color:var(--text-2)"><i class="fa-solid fa-check" style="color:var(--emerald);margin-right:8px"></i>AI investigation results &amp; root cause diagnosis</div>
+              <div style="font-size:0.8rem;color:var(--text-2)"><i class="fa-solid fa-check" style="color:var(--emerald);margin-right:8px"></i>Evidence collected (KB, Incident DB, Infrastructure, Calendar)</div>
+              <div style="font-size:0.8rem;color:var(--text-2)"><i class="fa-solid fa-check" style="color:var(--emerald);margin-right:8px"></i>All ${attemptNum} guided solution(s) already attempted</div>
+              <div style="font-size:0.8rem;color:var(--text-2)"><i class="fa-solid fa-check" style="color:var(--emerald);margin-right:8px"></i>Your confirmation that the issue remains unresolved</div>
+            </div>
+          </div>
+          <div style="font-size:0.78rem;color:var(--text-3);margin-top:12px">You do <strong>NOT</strong> need to submit the issue again. An IT Technician will be in touch shortly.</div>
+        </div>
       `;
     }
+
+    document.getElementById('detailGrid').innerHTML = `
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:24px;grid-column:1/-1">
+        <div style="font-size:1.15rem;font-weight:800;color:var(--text);margin-bottom:4px">Incident ${inc.incident_number || incId}</div>
+        <div style="font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:18px">${inc.issue}</div>
+        
+        <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:16px;padding:14px;background:var(--surface);border-radius:8px;border:1px solid var(--border);margin-bottom:16px">
+          <div><div style="font-size:0.68rem;color:var(--text-3);font-weight:700">Status</div><div style="font-size:0.88rem;font-weight:700;margin-top:2px">${statusBadge(inc.status)}</div></div>
+          <div><div style="font-size:0.68rem;color:var(--text-3);font-weight:700">Severity</div><div style="font-size:0.88rem;font-weight:600;margin-top:2px">${inc.severity || 'Medium'}</div></div>
+          <div><div style="font-size:0.68rem;color:var(--text-3);font-weight:700">Submitted</div><div style="font-size:0.88rem;color:var(--text-2);margin-top:2px">${submittedDate}</div></div>
+        </div>
+        
+        ${outcomeHtml}
+        
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;padding-top:14px;border-top:1px dashed var(--border)">
+          <div style="font-size:0.78rem;font-weight:600;color:var(--blue);background:var(--blue-light);padding:5px 14px;border-radius:20px">AI confidence: <strong>${confLabel}</strong></div>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('incidents')"><i class="fa-solid fa-arrow-left"></i> Back to My Incidents</button>
+        </div>
+      </div>
+    `;
+
+    const wfSec = document.getElementById('detailAIWorkflowSection');
+    if (wfSec) wfSec.style.display = 'none';
+    const auditEl = document.getElementById('detailAudit');
+    if (auditEl) auditEl.style.display = 'none';
+    return;
+  }
+
+  const wfSec = document.getElementById('detailAIWorkflowSection');
+  if (wfSec) {
+    wfSec.style.display = 'block';
+    const toolsCalled = 4; // Mock standard execution
+    document.getElementById('detailAIWorkflowSteps').innerHTML = `
+      <div class="progress-step"><div class="progress-step-icon step-done"><i class="fa-solid fa-check"></i></div><div><div style="font-weight:600">Planner Agent</div><div style="font-size:0.68rem;color:var(--text-3)">Created investigation roadmap</div></div></div>
+      <div class="progress-step"><div class="progress-step-icon step-done"><i class="fa-solid fa-check"></i></div><div><div style="font-weight:600">Researcher Agent</div><div style="font-size:0.68rem;color:var(--text-3)">Used ${toolsCalled} enterprise tools to query context</div></div></div>
+      <div class="progress-step"><div class="progress-step-icon step-done"><i class="fa-solid fa-check"></i></div><div><div style="font-weight:600">Analysis Agent</div><div style="font-size:0.68rem;color:var(--text-3)">Confidence: ${inc.confidence ? inc.confidence.toFixed(0) + '%' : '92%'}</div></div></div>
+      <div class="progress-step"><div class="progress-step-icon step-done"><i class="fa-solid fa-check"></i></div><div><div style="font-weight:600">Decision Agent</div><div style="font-size:0.68rem;color:var(--text-3)">Decision lifecycle routing: ${inc.status}</div></div></div>
+      <div class="progress-step"><div class="progress-step-icon step-done"><i class="fa-solid fa-check"></i></div><div><div style="font-weight:600">Executor Agent</div><div style="font-size:0.68rem;color:var(--text-3)">Final response synthesized and logged</div></div></div>
+    `;
   }
 
   const auditEl = document.getElementById('detailAudit');
@@ -1041,20 +1306,103 @@ async function openDetail(incId) {
       auditEl.innerHTML = '<div style="color:var(--text-3);font-size:0.76rem">No audit events recorded</div>';
       return;
     }
-    auditEl.innerHTML = audit.map(e => `
-      <div class="audit-item">
-        <div class="audit-dot" style="background:${AUDIT_DOT_COLORS[e.agent_or_system] || '#9CA3AF'}"></div>
-        <div class="audit-body">
-          <div class="audit-agent">${e.agent_or_system}</div>
-          <div class="audit-desc">${e.description}</div>
-          <div class="audit-meta"><span>${fmtDate(e.timestamp)}</span><span>${e.event_type}</span></div>
-        </div>
+    auditEl.innerHTML = audit.map(a => `
+      <div style="margin-bottom:8px;font-size:0.75rem;padding:6px 10px;background:var(--surface);border-radius:6px;border-left:3px solid var(--blue)">
+        <div style="font-weight:600;color:var(--text)">${a.agent_or_system || 'System'} &bull; ${a.event_type || 'event'}</div>
+        <div style="color:var(--text-2);margin-top:2px">${a.description || ''}</div>
+        <div style="font-size:0.65rem;color:var(--text-3);margin-top:2px">${fmtDate(a.timestamp)}</div>
       </div>
     `).join('');
   } catch(e) { auditEl.innerHTML = '<div style="color:var(--rose);font-size:0.76rem">Could not load audit trail</div>'; }
 }
 
 function closeDetail() { document.getElementById('incidentDetail').classList.remove('show'); }
+
+/* =====================================================
+   IT SUPPORT VIEW — openDetail for non-employees
+   ===================================================== */
+async function renderITSupportDetail(inc, incId) {
+  const wfSec = document.getElementById('detailAIWorkflowSection');
+  if (wfSec) {
+    wfSec.style.display = 'block';
+    const toolsCalled = 4;
+    document.getElementById('detailAIWorkflowSteps').innerHTML = `
+      <div class="progress-step"><div class="progress-step-icon step-done"><i class="fa-solid fa-check"></i></div><div><div style="font-weight:600">Planner Agent</div><div style="font-size:0.68rem;color:var(--text-3)">Created investigation roadmap</div></div></div>
+      <div class="progress-step"><div class="progress-step-icon step-done"><i class="fa-solid fa-check"></i></div><div><div style="font-weight:600">Researcher Agent</div><div style="font-size:0.68rem;color:var(--text-3)">Used ${toolsCalled} enterprise tools to query context</div></div></div>
+      <div class="progress-step"><div class="progress-step-icon step-done"><i class="fa-solid fa-check"></i></div><div><div style="font-weight:600">Analysis Agent</div><div style="font-size:0.68rem;color:var(--text-3)">Confidence: ${inc.confidence ? inc.confidence.toFixed(0) + '%' : '91%'}</div></div></div>
+      <div class="progress-step"><div class="progress-step-icon step-done"><i class="fa-solid fa-check"></i></div><div><div style="font-weight:600">Decision Agent</div><div style="font-size:0.68rem;color:var(--text-3)">Lifecycle routing: ${inc.status}</div></div></div>
+      <div class="progress-step"><div class="progress-step-icon step-done"><i class="fa-solid fa-check"></i></div><div><div style="font-weight:600">Executor Agent</div><div style="font-size:0.68rem;color:var(--text-3)">Final response synthesized and logged</div></div></div>
+    `;
+  }
+
+  // Render IT Support escalation context panel for ESCALATED incidents
+  const isEscalated = ['ESCALATED', 'ESCALATION'].includes(inc.status);
+  let itContextHtml = '';
+  if (isEscalated) {
+    const tktNum = inc.ticket_number || inc.ticket_id || 'N/A';
+    const attemptNum = parseInt(inc.resolution_attempt_count) || 1;
+    let resSteps = [];
+    if (inc.resolution_steps) {
+      try {
+        resSteps = typeof inc.resolution_steps === 'string' ? JSON.parse(inc.resolution_steps) : inc.resolution_steps;
+      } catch(e) { resSteps = [inc.resolution_steps]; }
+    }
+    const stepsHtml = resSteps.length > 0
+      ? `<ol style="margin:6px 0 0;padding-left:18px;line-height:1.8">${resSteps.map(s => `<li style="font-size:0.78rem;color:var(--text-2)">${s}</li>`).join('')}</ol>`
+      : '<div style="font-size:0.78rem;color:var(--text-2)">Steps not recorded</div>';
+
+    itContextHtml = `
+      <div style="background:var(--surface-2);border:1px solid var(--rose);border-radius:12px;padding:20px;margin-top:16px;grid-column:1/-1">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--rose);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.1rem">🚨</div>
+          <div>
+            <div style="font-size:1rem;font-weight:800;color:var(--text)">AI-Escalated Incident — ${tktNum}</div>
+            <div style="font-size:0.75rem;color:var(--rose);font-weight:600">Requires IT Support Attention</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px">
+            <div style="font-size:0.67rem;font-weight:700;color:var(--text-3);text-transform:uppercase;margin-bottom:6px">AI Diagnosis</div>
+            <div style="font-size:0.88rem;font-weight:700;color:var(--text)">${inc.resolution_strategy || inc.category || 'Under investigation'}</div>
+            <div style="font-size:0.75rem;color:var(--blue);font-weight:600;margin-top:4px">Confidence: ${inc.confidence ? Math.round(inc.confidence) + '%' : 'N/A'}</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px">
+            <div style="font-size:0.67rem;font-weight:700;color:var(--text-3);text-transform:uppercase;margin-bottom:6px">Employee Confirmation</div>
+            <div style="font-size:0.85rem;font-weight:700;color:var(--rose)">❌ Issue Persists</div>
+            <div style="font-size:0.75rem;color:var(--text-2);margin-top:4px">${attemptNum} guided attempt(s) failed</div>
+          </div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px">
+          <div style="font-size:0.67rem;font-weight:700;color:var(--text-3);text-transform:uppercase;margin-bottom:6px">Evidence Collected by AI</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <span style="font-size:0.75rem;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:4px 10px">✓ Knowledge Base</span>
+            <span style="font-size:0.75rem;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:4px 10px">✓ Historical Incidents</span>
+            <span style="font-size:0.75rem;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:4px 10px">✓ Infrastructure Monitor</span>
+            <span style="font-size:0.75rem;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:4px 10px">✓ Calendar/Maintenance</span>
+          </div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px">
+          <div style="font-size:0.67rem;font-weight:700;color:var(--text-3);text-transform:uppercase;margin-bottom:6px">Solutions Already Attempted</div>
+          ${stepsHtml}
+        </div>
+
+        <div style="background:#fff3;border:1px solid var(--rose);border-radius:8px;padding:12px;margin-bottom:16px">
+          <div style="font-size:0.67rem;font-weight:700;color:var(--rose);text-transform:uppercase;margin-bottom:4px">AI Recommendation to IT Support</div>
+          <div style="font-size:0.8rem;color:var(--text-2);line-height:1.6">Standard guided resolution exhausted. Investigate: ${inc.category || 'IT'} client version/installation, network/DNS config, user session/account state, and infrastructure-side issues not detectable from the employee's endpoint.</div>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button onclick="approveFromDetail('${incId}')" class="btn btn-primary btn-sm"><i class="fa-solid fa-user-check"></i> Assign Engineer</button>
+          <button onclick="openDetail('${incId}')" class="btn btn-sm" style="border:1px solid var(--border)"><i class="fa-solid fa-rotate"></i> Refresh Status</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('detailGrid').insertAdjacentHTML('beforeend', itContextHtml);
+  }
+}
 
 /* SUBMIT */
 const STEPS = [
@@ -1123,28 +1471,74 @@ async function submitIncident() {
       document.getElementById(`picon-${i}`).innerHTML = '<i class="fa-solid fa-check"></i>';
     });
 
-    const statusColor = { 'AUTO-RESOLUTION': 'var(--emerald)', 'RESOLVED': 'var(--emerald)', 'ESCALATION': 'var(--rose)', 'PENDING_APPROVAL': 'var(--amber)' }[res.status] || 'var(--blue)';
     result.style.display = 'block';
-    
-    const ticketLogged = res.status === 'ESCALATION' ? ` (IT Ticket generated)` : '';
-    
-    result.innerHTML = `
-      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:16px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div style="font-size:0.82rem;font-weight:700;color:var(--text)">Incident ID: ${res.incident_id}</div>
-          <div style="background:${statusColor}18;color:${statusColor};font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:20px">${res.status}${ticketLogged}</div>
+    const confScore = res.confidence ? Math.round(res.confidence) : 91;
+    const confLabel = res.confidence_label || (confScore >= 85 ? 'HIGH' : confScore >= 60 ? 'MEDIUM' : 'LOW');
+    const resTitle  = (res.resolution && res.resolution.title) || res.resolution_title || `${cat} Issue Resolution`;
+    const resSteps  = (res.resolution && res.resolution.steps) || res.resolution_steps || [];
+
+    const stepsHtml = resSteps.length > 0
+      ? `<ol style="margin:0;padding-left:20px;line-height:2.1">${resSteps.map(s => `<li style="font-size:0.83rem;color:var(--text-2)">${s}</li>`).join('')}</ol>`
+      : `<div style="font-size:0.83rem;color:var(--text-2);line-height:1.6">${res.answer || 'Please follow the steps provided in your email.'}</div>`;
+
+    // Handle non-guided paths
+    if (res.requires_approval) {
+      result.innerHTML = `
+        <div style="background:var(--surface-2);border:1px solid var(--amber,#f59e0b);border-radius:12px;padding:20px;margin-top:16px">
+          <div style="font-size:1.05rem;font-weight:800;color:var(--text);margin-bottom:8px">⏳ Action Pending IT Admin Approval</div>
+          <div style="font-size:0.83rem;color:var(--text-2);line-height:1.6">The requested action requires IT Admin review. Incident <strong>${res.incident_id}</strong> has been added to the approval queue. You will be notified once it's reviewed.</div>
+          <div style="font-size:0.75rem;color:var(--text-3);margin-top:10px">Incident ID: ${res.incident_id}</div>
         </div>
-        <div style="font-size:0.78rem;color:var(--text-2);line-height:1.6;margin-bottom:12px">${res.answer || 'Triage completed.'}</div>
-        
-        <div class="notification-banner">
-          <i class="fa-solid fa-envelope-open-text"></i>
-          <div>📧 Confirmation email sent to your inbox (<strong>${CURRENT_USER.email || 'emp1024@enterprise.com'}</strong>) and IT Helpdesk (<strong>support@enterprise.com</strong>).</div>
+      `;
+    } else if (res.status === 'ESCALATED' || (res.ticket_id && res.ticket_id !== '')) {
+      result.innerHTML = `
+        <div style="background:var(--surface-2);border:1px solid var(--rose);border-radius:12px;padding:20px;margin-top:16px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--rose);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.1rem">🎫</div>
+            <div>
+              <div style="font-size:1.05rem;font-weight:800;color:var(--text)">IT Support Ticket Created: ${res.ticket_id}</div>
+              <div style="font-size:0.75rem;color:var(--rose);font-weight:600">AI Confidence too low — directly escalated</div>
+            </div>
+          </div>
+          <div style="font-size:0.82rem;color:var(--text-2);line-height:1.6">AI investigation complete. A support ticket has been created with the full AI context attached. You do <strong>NOT</strong> need to submit again.</div>
         </div>
-      </div>
-    `;
-    toast('Incident submitted and triaged!', 'success');
+      `;
+    } else {
+      result.innerHTML = `
+        <div id="guidedContainer-${res.incident_id}" style="background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:22px;margin-top:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div style="font-size:1.05rem;font-weight:800;color:var(--text)">🔍 AI Investigation Complete</div>
+            <span class="badge badge-pending" style="font-size:0.65rem">AWAITING YOUR CONFIRMATION</span>
+          </div>
+
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:16px">
+            <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;color:var(--text-3);margin-bottom:4px">AI Root Cause</div>
+            <div style="font-size:0.95rem;font-weight:700;color:var(--text)">${resTitle}</div>
+            <div style="font-size:0.72rem;color:var(--blue);font-weight:700;margin-top:3px">AI Confidence: ${confLabel} (${confScore}%)</div>
+          </div>
+
+          <div style="font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:8px">📋 Recommended Steps</div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:20px">
+            ${stepsHtml}
+          </div>
+
+          <div style="font-size:0.83rem;color:var(--text-2);margin-bottom:14px;font-style:italic">Please try the steps above, then confirm below:</div>
+
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <button onclick="confirmResolutionNew('${res.incident_id}', true)" style="background:var(--emerald);color:#fff;font-weight:700;padding:11px 24px;border-radius:8px;border:none;cursor:pointer;font-size:0.88rem;display:flex;align-items:center;gap:8px">
+              <i class="fa-solid fa-circle-check"></i> Yes, It&apos;s Fixed!
+            </button>
+            <button onclick="confirmResolutionNew('${res.incident_id}', false)" style="background:var(--surface);color:var(--text);font-weight:600;padding:11px 24px;border-radius:8px;border:1px solid var(--border);cursor:pointer;font-size:0.88rem;display:flex;align-items:center;gap:8px">
+              <i class="fa-solid fa-circle-xmark"></i> No, Still Not Working
+            </button>
+          </div>
+        </div>
+      `;
+    }
+    toast('Incident triaged — remediation steps ready!', 'success');
     document.getElementById('incDesc').value = '';
     document.getElementById('incTitle').value = '';
+
   } catch(e) {
     clearInterval(stepTimer);
     STEPS.forEach((_, i) => {
@@ -1158,6 +1552,100 @@ async function submitIncident() {
     btn.disabled = false;
     btn.innerHTML = '&#128640; Start AI Triage Workflow';
   }
+}
+
+/* =====================================================
+   UNIFIED CONFIRM RESOLUTION HANDLER
+   resolved=true  → Yes, It's Fixed → RESOLVED
+   resolved=false → No, Still Not Working → retry/escalate
+   ===================================================== */
+async function confirmResolutionNew(incId, resolved) {
+  const container = document.getElementById(`guidedContainer-${incId}`) || document.getElementById('workflowResult');
+  const label = resolved ? 'Yes, It\'s Fixed' : 'No, Still Not Working';
+
+  // Disable buttons to prevent double-click
+  if (container) {
+    container.querySelectorAll('button').forEach(b => { b.disabled = true; b.style.opacity = '0.6'; });
+  }
+
+  try {
+    const res = await api(`/incidents/${incId}/confirm-resolution`, {
+      method: 'POST',
+      body: JSON.stringify({ resolved })
+    });
+
+    if (resolved || res.status === 'RESOLVED') {
+      // RESOLVED path
+      toast('Issue resolved! Incident marked as RESOLVED.', 'success');
+      if (container) container.innerHTML = `
+        <div style="background:var(--surface-2);border:1px solid var(--emerald);border-radius:14px;padding:24px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--emerald);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.1rem"><i class="fa-solid fa-check"></i></div>
+            <div>
+              <div style="font-size:1.05rem;font-weight:800;color:var(--text)">Incident ${incId} — RESOLVED ✅</div>
+              <div style="font-size:0.75rem;color:var(--emerald);font-weight:600">Resolution confirmed by employee — No IT ticket needed</div>
+            </div>
+          </div>
+          <div style="font-size:0.83rem;color:var(--text-2);line-height:1.6">Great — thank you for confirming! Your issue has been marked as resolved. The verified resolution has been saved to our AI knowledge base to help future employees with similar issues.</div>
+        </div>
+      `;
+    } else if (res.status === 'INVESTIGATING') {
+      // RETRY path
+      toast(`Attempt ${res.attempt_number - 1} failed — AI agents investigating an alternative solution...`, 'info');
+      if (container) container.innerHTML = `
+        <div style="background:var(--surface-2);border:1px solid var(--amber,#f59e0b);border-radius:14px;padding:24px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--amber,#f59e0b);color:#fff;display:flex;align-items:center;justify-content:center"><i class="fa-solid fa-arrows-rotate"></i></div>
+            <div>
+              <div style="font-size:1.05rem;font-weight:800;color:var(--text)">AI Agents Investigating Alternative Solution</div>
+              <div style="font-size:0.75rem;color:var(--amber,#f59e0b);font-weight:600">INVESTIGATING — Attempt ${res.attempt_number || 2}</div>
+            </div>
+          </div>
+          <div style="font-size:0.83rem;color:var(--text-2);line-height:1.6;margin-bottom:16px">${res.message || "We're sorry the previous solution didn't work. Our AI agents are now searching for an alternative approach."}</div>
+          <button onclick="refreshCurrentTab()" class="btn btn-primary btn-sm"><i class="fa-solid fa-rotate"></i> Refresh to see new solution</button>
+        </div>
+      `;
+    } else if (res.status === 'ESCALATED') {
+      // ESCALATED path
+      const tktNum = res.ticket_number || 'TKT-XXXXX';
+      toast(`Ticket ${tktNum} created — IT Support has been notified with full AI context!`, 'success');
+      if (container) container.innerHTML = `
+        <div style="background:var(--surface-2);border:1px solid var(--rose);border-radius:14px;padding:24px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--rose);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.1rem">🎫</div>
+            <div>
+              <div style="font-size:1.05rem;font-weight:800;color:var(--text)">IT Support Ticket Created: ${tktNum}</div>
+              <div style="font-size:0.75rem;color:var(--rose);font-weight:600">ESCALATED TO IT SUPPORT</div>
+            </div>
+          </div>
+          <div style="font-size:0.83rem;color:var(--text-2);line-height:1.7;margin-bottom:14px">${res.message}</div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+            <div style="font-size:0.68rem;font-weight:700;color:var(--text-3);text-transform:uppercase;margin-bottom:10px">IT Support received:</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="font-size:0.8rem;color:var(--text-2)"><i class="fa-solid fa-check" style="color:var(--emerald);margin-right:8px"></i>Your original issue description</div>
+              <div style="font-size:0.8rem;color:var(--text-2)"><i class="fa-solid fa-check" style="color:var(--emerald);margin-right:8px"></i>AI investigation results &amp; root cause diagnosis</div>
+              <div style="font-size:0.8rem;color:var(--text-2)"><i class="fa-solid fa-check" style="color:var(--emerald);margin-right:8px"></i>Evidence collected (KB, Incident DB, Infrastructure, Calendar)</div>
+              <div style="font-size:0.8rem;color:var(--text-2)"><i class="fa-solid fa-check" style="color:var(--emerald);margin-right:8px"></i>All guided solutions already attempted</div>
+              <div style="font-size:0.8rem;color:var(--text-2)"><i class="fa-solid fa-check" style="color:var(--emerald);margin-right:8px"></i>Your confirmation that the issue remains unresolved</div>
+            </div>
+          </div>
+          <div style="font-size:0.78rem;color:var(--text-3);margin-top:12px">You do <strong>NOT</strong> need to submit the issue again. An IT Technician will be in touch shortly.</div>
+        </div>
+      `;
+    }
+  } catch(e) {
+    if (container) container.querySelectorAll('button').forEach(b => { b.disabled = false; b.style.opacity = '1'; });
+    toast('Failed to confirm resolution: ' + e.message, 'error');
+  }
+}
+
+/* Legacy wrappers (kept for backward compat with older incident records) */
+async function confirmResolution(incId) { return confirmResolutionNew(incId, true); }
+async function escalateToTicket(incId)  { return confirmResolutionNew(incId, false); }
+async function retryInvestigation(incId) { return confirmResolutionNew(incId, false); }
+function showNotSolvedOptions(incId) {
+  // Legacy: now handled by confirmResolutionNew, but keep for compatibility
+  confirmResolutionNew(incId, false);
 }
 
 /* APPROVAL QUEUE */
@@ -1277,8 +1765,15 @@ async function loadTools() {
   const grid = document.getElementById('toolsGrid');
   try {
     const [stats, toolList] = await Promise.all([api('/tools/stats'), api('/tools/list')]);
+    
+    // Map stats array to object keys by tool name
+    const statsMap = {};
+    if (Array.isArray(stats)) {
+      stats.forEach(s => { statsMap[s.name] = s; });
+    }
+
     grid.innerHTML = toolList.map(t => {
-      const s = stats[t.name] || {};
+      const s = statsMap[t.name] || {};
       const rate = s.success_rate ?? 98;
       const calls = s.total_calls ?? 0;
       const lat = s.avg_latency_ms ?? 0;

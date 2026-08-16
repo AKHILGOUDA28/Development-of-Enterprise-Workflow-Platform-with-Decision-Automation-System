@@ -3,294 +3,915 @@
     "id": "KB-1001",
     "category": "VPN",
     "issue": "VPN connection timeout",
-    "symptoms": ["VPN client stuck on connecting", "TLS handshake failed error"],
-    "solution": ["Restart VPN client service (Cisco AnyConnect / Palo Alto GlobalProtect)", "Flush DNS cache via ipconfig /flushdns", "Verify user network adapter MTU size is set to 1400", "Reconnect to alternate VPN gateway endpoint"]
+    "symptoms": [
+      "VPN client stuck on connecting",
+      "TLS handshake failed error"
+    ],
+    "solution": [
+      "Restart VPN client service (Cisco AnyConnect / Palo Alto GlobalProtect)",
+      "Flush DNS cache via ipconfig /flushdns",
+      "Verify user network adapter MTU size is set to 1400",
+      "Reconnect to alternate VPN gateway endpoint"
+    ],
+    "known_causes": [
+      "VPN client configuration mismatch",
+      "Outdated VPN client software version",
+      "DNS routing or network interface MTU mismatch"
+    ],
+    "historical_success_count": 7,
+    "success_rate_pct": 86,
+    "avg_confidence_pct": 91
   },
   {
     "id": "KB-1002",
     "category": "VPN",
     "issue": "VPN connected but no internet or internal access",
-    "symptoms": ["No traffic routing", "Cannot ping internal IP range 10.x.x.x"],
-    "solution": ["Check split-tunneling firewall rules", "Reset IP stack via netsh int ip reset", "Verify routing table entries via route print", "Disconnect third-party proxy tools"]
+    "symptoms": [
+      "No traffic routing",
+      "Cannot ping internal IP range 10.x.x.x"
+    ],
+    "solution": [
+      "Check split-tunneling firewall rules",
+      "Reset IP stack via netsh int ip reset",
+      "Verify routing table entries via route print",
+      "Disconnect third-party proxy tools"
+    ],
+    "known_causes": [
+      "VPN client configuration mismatch",
+      "Outdated VPN client software version",
+      "DNS routing or network interface MTU mismatch"
+    ],
+    "historical_success_count": 7,
+    "success_rate_pct": 86,
+    "avg_confidence_pct": 91
   },
   {
     "id": "KB-1003",
     "category": "VPN",
     "issue": "VPN driver protocol error after Windows update",
-    "symptoms": ["Error 720 / WAN Miniport error", "Virtual adapter driver corrupted"],
-    "solution": ["Reinstall WAN Miniport network adapters in Device Manager", "Reset network stack via netsh winsock reset", "Reinstall corporate VPN software package", "Reboot workstation"]
+    "symptoms": [
+      "Error 720 / WAN Miniport error",
+      "Virtual adapter driver corrupted"
+    ],
+    "solution": [
+      "Reinstall WAN Miniport network adapters in Device Manager",
+      "Reset network stack via netsh winsock reset",
+      "Reinstall corporate VPN software package",
+      "Reboot workstation"
+    ],
+    "known_causes": [
+      "VPN client configuration mismatch",
+      "Outdated VPN client software version",
+      "DNS routing or network interface MTU mismatch"
+    ],
+    "historical_success_count": 7,
+    "success_rate_pct": 86,
+    "avg_confidence_pct": 91
   },
   {
     "id": "KB-1004",
     "category": "VPN",
     "issue": "VPN MFA push notification missing",
-    "symptoms": ["Duo / Okta MFA prompt never arrives on mobile device"],
-    "solution": ["Ensure mobile phone has active internet connection", "Open Authenticator app directly to trigger manual OTP refresh", "Re-register MFA device via self-service portal", "Clear app cache on mobile device"]
+    "symptoms": [
+      "Duo / Okta MFA prompt never arrives on mobile device"
+    ],
+    "solution": [
+      "Ensure mobile phone has active internet connection",
+      "Open Authenticator app directly to trigger manual OTP refresh",
+      "Re-register MFA device via self-service portal",
+      "Clear app cache on mobile device"
+    ],
+    "known_causes": [
+      "VPN client configuration mismatch",
+      "Outdated VPN client software version",
+      "DNS routing or network interface MTU mismatch"
+    ],
+    "historical_success_count": 7,
+    "success_rate_pct": 86,
+    "avg_confidence_pct": 91
   },
   {
     "id": "KB-1005",
     "category": "WiFi",
     "issue": "Corporate WiFi authentication failed",
-    "symptoms": ["Cannot connect to Corporate-802.1X", "Prompted for password repeatedly"],
-    "solution": ["Forget Corporate WiFi network profile", "Verify user Active Directory password hasn't expired", "Re-import radius root CA certificate", "Reconnect using domain credentials"]
+    "symptoms": [
+      "Cannot connect to Corporate-802.1X",
+      "Prompted for password repeatedly"
+    ],
+    "solution": [
+      "Forget Corporate WiFi network profile",
+      "Verify user Active Directory password hasn't expired",
+      "Re-import radius root CA certificate",
+      "Reconnect using domain credentials"
+    ],
+    "known_causes": [
+      "Intel aggression roaming configuration setting",
+      "Outdated wireless network adapter drivers",
+      "Radius certificate validation failure"
+    ],
+    "historical_success_count": 12,
+    "success_rate_pct": 84,
+    "avg_confidence_pct": 89
   },
   {
     "id": "KB-1006",
     "category": "WiFi",
     "issue": "Frequent WiFi disconnects in office area",
-    "symptoms": ["Intermittent wireless packet loss", "Roaming failover delay"],
-    "solution": ["Update Intel Wireless NIC driver to latest WHQL version", "Disable aggressive roaming in NIC advanced settings", "Verify AP signal strength (> -65 dBm)", "Report localized dead zone to IT infrastructure team"]
+    "symptoms": [
+      "Intermittent wireless packet loss",
+      "Roaming failover delay"
+    ],
+    "solution": [
+      "Update Intel Wireless NIC driver to latest WHQL version",
+      "Disable aggressive roaming in NIC advanced settings",
+      "Verify AP signal strength (> -65 dBm)",
+      "Report localized dead zone to IT infrastructure team"
+    ],
+    "known_causes": [
+      "Intel aggression roaming configuration setting",
+      "Outdated wireless network adapter drivers",
+      "Radius certificate validation failure"
+    ],
+    "historical_success_count": 12,
+    "success_rate_pct": 84,
+    "avg_confidence_pct": 89
   },
   {
     "id": "KB-1007",
     "category": "WiFi",
     "issue": "Guest WiFi portal page not loading",
-    "symptoms": ["Captive portal captive.apple.com / nmcheck fails to pop up"],
-    "solution": ["Navigate to http://142.250.190.46 (http://neverssl.com) in browser", "Clear browser cache and DNS cache", "Verify DHCP assigned IP is in 172.16.x.x guest subnet"]
+    "symptoms": [
+      "Captive portal captive.apple.com / nmcheck fails to pop up"
+    ],
+    "solution": [
+      "Navigate to http://142.250.190.46 (http://neverssl.com) in browser",
+      "Clear browser cache and DNS cache",
+      "Verify DHCP assigned IP is in 172.16.x.x guest subnet"
+    ],
+    "known_causes": [
+      "Intel aggression roaming configuration setting",
+      "Outdated wireless network adapter drivers",
+      "Radius certificate validation failure"
+    ],
+    "historical_success_count": 12,
+    "success_rate_pct": 84,
+    "avg_confidence_pct": 89
   },
   {
     "id": "KB-1008",
     "category": "Printer",
     "issue": "Printer status offline or spooler stuck",
-    "symptoms": ["Documents queued but not printing", "Print spooler error"],
-    "solution": ["Open Services.msc and restart Print Spooler service", "Clear C:\\Windows\\System32\\spool\\PRINTERS directory", "Verify printer IP ping response", "Set printer status to Online"]
+    "symptoms": [
+      "Documents queued but not printing",
+      "Print spooler error"
+    ],
+    "solution": [
+      "Open Services.msc and restart Print Spooler service",
+      "Clear C:\\Windows\\System32\\spool\\PRINTERS directory",
+      "Verify printer IP ping response",
+      "Set printer status to Online"
+    ],
+    "known_causes": [
+      "Windows print spooler service hung",
+      "Stuck jobs in queue directory C:\\Windows\\System32\\spool\\PRINTERS",
+      "Stale print server IP association"
+    ],
+    "historical_success_count": 9,
+    "success_rate_pct": 88,
+    "avg_confidence_pct": 90
   },
   {
     "id": "KB-1009",
     "category": "Printer",
     "issue": "Network printer permission denied",
-    "symptoms": ["Access Denied 0x00000005 when connecting to network printer server"],
-    "solution": ["Check user Security Group membership in Active Directory for printer access", "Re-add printer via Universal Print Cloud portal", "Re-install PCL6 print driver with admin privileges"]
+    "symptoms": [
+      "Access Denied 0x00000005 when connecting to network printer server"
+    ],
+    "solution": [
+      "Check user Security Group membership in Active Directory for printer access",
+      "Re-add printer via Universal Print Cloud portal",
+      "Re-install PCL6 print driver with admin privileges"
+    ],
+    "known_causes": [
+      "Windows print spooler service hung",
+      "Stuck jobs in queue directory C:\\Windows\\System32\\spool\\PRINTERS",
+      "Stale print server IP association"
+    ],
+    "historical_success_count": 9,
+    "success_rate_pct": 88,
+    "avg_confidence_pct": 90
   },
   {
     "id": "KB-1010",
     "category": "Printer",
     "issue": "Secure Print badge authentication failure",
-    "symptoms": ["RFID badge reader beep error on Xerox/HP MFP"],
-    "solution": ["Verify employee RFID badge ID in Print Server database", "Sync badge mapping via Active Directory identity sync", "Re-swipe badge or log in manually using PIN"]
+    "symptoms": [
+      "RFID badge reader beep error on Xerox/HP MFP"
+    ],
+    "solution": [
+      "Verify employee RFID badge ID in Print Server database",
+      "Sync badge mapping via Active Directory identity sync",
+      "Re-swipe badge or log in manually using PIN"
+    ],
+    "known_causes": [
+      "Windows print spooler service hung",
+      "Stuck jobs in queue directory C:\\Windows\\System32\\spool\\PRINTERS",
+      "Stale print server IP association"
+    ],
+    "historical_success_count": 9,
+    "success_rate_pct": 88,
+    "avg_confidence_pct": 90
   },
   {
     "id": "KB-1011",
     "category": "Outlook",
     "issue": "Outlook disconnected or stuck on updating inbox",
-    "symptoms": ["Status bar shows Disconnected or Need Password"],
-    "solution": ["Check Microsoft 365 Exchange Online service status", "Credential Manager -> Delete cached Office/Outlook credentials", "Launch Outlook in safe mode (outlook.exe /safe)", "Recreate Outlook mail profile"]
+    "symptoms": [
+      "Status bar shows Disconnected or Need Password"
+    ],
+    "solution": [
+      "Check Microsoft 365 Exchange Online service status",
+      "Credential Manager -> Delete cached Office/Outlook credentials",
+      "Launch Outlook in safe mode (outlook.exe /safe)",
+      "Recreate Outlook mail profile"
+    ],
+    "known_causes": [
+      "M365 credential manager token expiration",
+      "Corrupted Outlook OST mailbox cache file",
+      "Third-party COM add-in freeze"
+    ],
+    "historical_success_count": 8,
+    "success_rate_pct": 85,
+    "avg_confidence_pct": 88
   },
   {
     "id": "KB-1012",
     "category": "Outlook",
     "issue": "Outlook OST mailbox corrupt",
-    "symptoms": ["Errors opening mailbox folders", "Outlook crashes during indexing"],
-    "solution": ["Run SCANPST.EXE repair tool on OST file", "Rename .ost file to .old and re-launch Outlook to re-download mailbox", "Disable third-party COM add-ins"]
+    "symptoms": [
+      "Errors opening mailbox folders",
+      "Outlook crashes during indexing"
+    ],
+    "solution": [
+      "Run SCANPST.EXE repair tool on OST file",
+      "Rename .ost file to .old and re-launch Outlook to re-download mailbox",
+      "Disable third-party COM add-ins"
+    ],
+    "known_causes": [
+      "M365 credential manager token expiration",
+      "Corrupted Outlook OST mailbox cache file",
+      "Third-party COM add-in freeze"
+    ],
+    "historical_success_count": 8,
+    "success_rate_pct": 85,
+    "avg_confidence_pct": 88
   },
   {
     "id": "KB-1013",
     "category": "Outlook",
     "issue": "Shared mailbox not showing in Outlook client",
-    "symptoms": ["User assigned delegate permission but mailbox missing in sidebar"],
-    "solution": ["Verify Full Access permission granted in Exchange Admin Center", "Toggle Automapping attribute", "Manually add shared account under Account Settings -> Advanced", "Force offline address book update"]
+    "symptoms": [
+      "User assigned delegate permission but mailbox missing in sidebar"
+    ],
+    "solution": [
+      "Verify Full Access permission granted in Exchange Admin Center",
+      "Toggle Automapping attribute",
+      "Manually add shared account under Account Settings -> Advanced",
+      "Force offline address book update"
+    ],
+    "known_causes": [
+      "M365 credential manager token expiration",
+      "Corrupted Outlook OST mailbox cache file",
+      "Third-party COM add-in freeze"
+    ],
+    "historical_success_count": 8,
+    "success_rate_pct": 85,
+    "avg_confidence_pct": 88
   },
   {
     "id": "KB-1014",
     "category": "Outlook",
     "issue": "Email delivery bounce back NDR 5.7.1",
-    "symptoms": ["Non-Delivery Report: Access denied / Relay forbidden"],
-    "solution": ["Verify recipient address spelling", "Check SPF/DKIM/DMARC records for sender domain", "Confirm email attachment does not violate size limit (25MB)", "Remove outbound IP from spam blacklist"]
+    "symptoms": [
+      "Non-Delivery Report: Access denied / Relay forbidden"
+    ],
+    "solution": [
+      "Verify recipient address spelling",
+      "Check SPF/DKIM/DMARC records for sender domain",
+      "Confirm email attachment does not violate size limit (25MB)",
+      "Remove outbound IP from spam blacklist"
+    ],
+    "known_causes": [
+      "M365 credential manager token expiration",
+      "Corrupted Outlook OST mailbox cache file",
+      "Third-party COM add-in freeze"
+    ],
+    "historical_success_count": 8,
+    "success_rate_pct": 85,
+    "avg_confidence_pct": 88
   },
   {
     "id": "KB-1015",
     "category": "Windows",
     "issue": "Blue Screen of Death (BSOD) CRITICAL_PROCESS_DIED",
-    "symptoms": ["System unexpected reboot with stop code 0x000000EF"],
-    "solution": ["Boot into Safe Mode", "Run System File Checker: sfc /scannow", "Run DISM /Online /Cleanup-Image /RestoreHealth", "Check Minidump log files in C:\\Windows\\Minidump", "Roll back recent cumulative Windows update"]
+    "symptoms": [
+      "System unexpected reboot with stop code 0x000000EF"
+    ],
+    "solution": [
+      "Boot into Safe Mode",
+      "Run System File Checker: sfc /scannow",
+      "Run DISM /Online /Cleanup-Image /RestoreHealth",
+      "Check Minidump log files in C:\\Windows\\Minidump",
+      "Roll back recent cumulative Windows update"
+    ],
+    "known_causes": [
+      "Local application configuration mismatch",
+      "Stale user profile AppData temporary files",
+      "Service authentication token mismatch"
+    ],
+    "historical_success_count": 7,
+    "success_rate_pct": 81,
+    "avg_confidence_pct": 86
   },
   {
     "id": "KB-1016",
     "category": "Windows",
     "issue": "Windows high CPU memory leak by System System Idle",
-    "symptoms": ["Laptop fan spinning high", "CPU usage at 99-100%"],
-    "solution": ["Identify offending process in Task Manager / Process Explorer", "Disable Windows Search Indexer service temporarily", "Update chipset and graphics driver", "Check for pending background Windows updates"]
+    "symptoms": [
+      "Laptop fan spinning high",
+      "CPU usage at 99-100%"
+    ],
+    "solution": [
+      "Identify offending process in Task Manager / Process Explorer",
+      "Disable Windows Search Indexer service temporarily",
+      "Update chipset and graphics driver",
+      "Check for pending background Windows updates"
+    ],
+    "known_causes": [
+      "Local application configuration mismatch",
+      "Stale user profile AppData temporary files",
+      "Service authentication token mismatch"
+    ],
+    "historical_success_count": 10,
+    "success_rate_pct": 84,
+    "avg_confidence_pct": 89
   },
   {
     "id": "KB-1017",
     "category": "Windows",
     "issue": "BitLocker recovery key prompt on boot",
-    "symptoms": ["Drive locked, requiring 48-digit recovery key"],
-    "solution": ["Retrieve BitLocker recovery key from Microsoft Entra ID portal", "Verify TPM 2.0 status in BIOS firmware", "Resume BitLocker protection after BIOS firmware update"]
+    "symptoms": [
+      "Drive locked, requiring 48-digit recovery key"
+    ],
+    "solution": [
+      "Retrieve BitLocker recovery key from Microsoft Entra ID portal",
+      "Verify TPM 2.0 status in BIOS firmware",
+      "Resume BitLocker protection after BIOS firmware update"
+    ],
+    "known_causes": [
+      "Active Directory security policy lockout threshold reached",
+      "Expired domain password cached in Windows Credential Manager",
+      "MFA device registration sync delay"
+    ],
+    "historical_success_count": 15,
+    "success_rate_pct": 94,
+    "avg_confidence_pct": 95
   },
   {
     "id": "KB-1018",
     "category": "Windows",
     "issue": "Windows update installation error 0x80070002",
-    "symptoms": ["Updates fail at 20-40% progress"],
-    "solution": ["Stop Windows Update service (net stop wuauserv)", "Delete contents of C:\\Windows\\SoftwareDistribution\\Download", "Restart wuauserv service", "Rerun Windows Update"]
+    "symptoms": [
+      "Updates fail at 20-40% progress"
+    ],
+    "solution": [
+      "Stop Windows Update service (net stop wuauserv)",
+      "Delete contents of C:\\Windows\\SoftwareDistribution\\Download",
+      "Restart wuauserv service",
+      "Rerun Windows Update"
+    ],
+    "known_causes": [
+      "Local application configuration mismatch",
+      "Stale user profile AppData temporary files",
+      "Service authentication token mismatch"
+    ],
+    "historical_success_count": 6,
+    "success_rate_pct": 77,
+    "avg_confidence_pct": 81
   },
   {
     "id": "KB-1019",
     "category": "Password",
     "issue": "Domain account locked out",
-    "symptoms": ["The referenced account is currently locked out error"],
-    "solution": ["Check for saved stale credentials in Credential Manager on mobile/tablet devices", "Wait 15-minute lockout duration or use Admin unlock tool", "Perform self-service password reset via SSPR portal"]
+    "symptoms": [
+      "The referenced account is currently locked out error"
+    ],
+    "solution": [
+      "Check for saved stale credentials in Credential Manager on mobile/tablet devices",
+      "Wait 15-minute lockout duration or use Admin unlock tool",
+      "Perform self-service password reset via SSPR portal"
+    ],
+    "known_causes": [
+      "Active Directory security policy lockout threshold reached",
+      "Expired domain password cached in Windows Credential Manager",
+      "MFA device registration sync delay"
+    ],
+    "historical_success_count": 15,
+    "success_rate_pct": 94,
+    "avg_confidence_pct": 95
   },
   {
     "id": "KB-1020",
     "category": "Password",
     "issue": "Active Directory password expired",
-    "symptoms": ["Cannot log into workstation or web SSO portal"],
-    "solution": ["Navigate to corporate SSPR self-service portal (https://password.company.com)", "Authenticate with MFA prompt", "Set new compliant password (14+ characters, complexity enabled)", "Update saved credentials in Outlook and Teams"]
+    "symptoms": [
+      "Cannot log into workstation or web SSO portal"
+    ],
+    "solution": [
+      "Navigate to corporate SSPR self-service portal (https://password.company.com)",
+      "Authenticate with MFA prompt",
+      "Set new compliant password (14+ characters, complexity enabled)",
+      "Update saved credentials in Outlook and Teams"
+    ],
+    "known_causes": [
+      "Active Directory security policy lockout threshold reached",
+      "Expired domain password cached in Windows Credential Manager",
+      "MFA device registration sync delay"
+    ],
+    "historical_success_count": 15,
+    "success_rate_pct": 94,
+    "avg_confidence_pct": 95
   },
   {
     "id": "KB-1021",
     "category": "Password",
     "issue": "SSO SAML token validation expired",
-    "symptoms": ["Single Sign-On loop error: AuthNResponse signature invalid"],
-    "solution": ["Clear browser cookies and session storage", "Sync workstation system clock with NTP server (net time /set)", "Verify SAML signing certificate expiration in IdP portal"]
+    "symptoms": [
+      "Single Sign-On loop error: AuthNResponse signature invalid"
+    ],
+    "solution": [
+      "Clear browser cookies and session storage",
+      "Sync workstation system clock with NTP server (net time /set)",
+      "Verify SAML signing certificate expiration in IdP portal"
+    ],
+    "known_causes": [
+      "Active Directory security policy lockout threshold reached",
+      "Expired domain password cached in Windows Credential Manager",
+      "MFA device registration sync delay"
+    ],
+    "historical_success_count": 15,
+    "success_rate_pct": 94,
+    "avg_confidence_pct": 95
   },
   {
     "id": "KB-1022",
     "category": "Network",
     "issue": "Cannot access internal network share drive (\\\\fileserver\\share)",
-    "symptoms": ["Network path was not found error 0x80070035"],
-    "solution": ["Verify VPN connectivity if working remotely", "Check DNS resolution via nslookup fileserver.domain.com", "Verify SMBv2 protocol enabled on client", "Map network drive using explicit domain credentials"]
+    "symptoms": [
+      "Network path was not found error 0x80070035"
+    ],
+    "solution": [
+      "Verify VPN connectivity if working remotely",
+      "Check DNS resolution via nslookup fileserver.domain.com",
+      "Verify SMBv2 protocol enabled on client",
+      "Map network drive using explicit domain credentials"
+    ],
+    "known_causes": [
+      "Local application configuration mismatch",
+      "Stale user profile AppData temporary files",
+      "Service authentication token mismatch"
+    ],
+    "historical_success_count": 7,
+    "success_rate_pct": 81,
+    "avg_confidence_pct": 89
   },
   {
     "id": "KB-1023",
     "category": "Network",
     "issue": "DNS resolution failure for internal hosts",
-    "symptoms": ["Ping IP works, ping domain hostname fails"],
-    "solution": ["Flush DNS cache (ipconfig /flushdns)", "Verify DNS server configuration points to internal Domain Controllers (10.0.0.10/11)", "Register DNS via ipconfig /registerdns"]
+    "symptoms": [
+      "Ping IP works, ping domain hostname fails"
+    ],
+    "solution": [
+      "Flush DNS cache (ipconfig /flushdns)",
+      "Verify DNS server configuration points to internal Domain Controllers (10.0.0.10/11)",
+      "Register DNS via ipconfig /registerdns"
+    ],
+    "known_causes": [
+      "Local application configuration mismatch",
+      "Stale user profile AppData temporary files",
+      "Service authentication token mismatch"
+    ],
+    "historical_success_count": 9,
+    "success_rate_pct": 81,
+    "avg_confidence_pct": 85
   },
   {
     "id": "KB-1024",
     "category": "Network",
     "issue": "Ethernet adapter self-assigned IP 169.254.x.x (APIPA)",
-    "symptoms": ["No internet access", "Unidentified network"],
-    "solution": ["Verify network cable is securely plugged in", "Release/renew DHCP lease via ipconfig /release && ipconfig /renew", "Verify DHCP server scope has available IP addresses", "Restart DHCP Client service"]
+    "symptoms": [
+      "No internet access",
+      "Unidentified network"
+    ],
+    "solution": [
+      "Verify network cable is securely plugged in",
+      "Release/renew DHCP lease via ipconfig /release && ipconfig /renew",
+      "Verify DHCP server scope has available IP addresses",
+      "Restart DHCP Client service"
+    ],
+    "known_causes": [
+      "Local application configuration mismatch",
+      "Stale user profile AppData temporary files",
+      "Service authentication token mismatch"
+    ],
+    "historical_success_count": 9,
+    "success_rate_pct": 76,
+    "avg_confidence_pct": 83
   },
   {
     "id": "KB-1025",
     "category": "ERP",
     "issue": "SAP / Oracle ERP login session timeout",
-    "symptoms": ["System exception: Session timed out / Database connection dropped"],
-    "solution": ["Clear SAP GUI cache / Oracle web app temporary cache", "Verify user ERP role permissions in SAP GRC portal", "Check ERP application server database connection pool status", "Relaunch ERP client session"]
+    "symptoms": [
+      "System exception: Session timed out / Database connection dropped"
+    ],
+    "solution": [
+      "Clear SAP GUI cache / Oracle web app temporary cache",
+      "Verify user ERP role permissions in SAP GRC portal",
+      "Check ERP application server database connection pool status",
+      "Relaunch ERP client session"
+    ],
+    "known_causes": [
+      "Local application configuration mismatch",
+      "Stale user profile AppData temporary files",
+      "Service authentication token mismatch"
+    ],
+    "historical_success_count": 7,
+    "success_rate_pct": 81,
+    "avg_confidence_pct": 90
   },
   {
     "id": "KB-1026",
     "category": "ERP",
     "issue": "Financial invoice batch post error",
-    "symptoms": ["Batch job stuck in RUNNING or ABORTED status"],
-    "solution": ["Check background job log in ERP queue", "Verify fiscal period posting key open in GL settings", "Re-run batch job with administrative override permissions"]
+    "symptoms": [
+      "Batch job stuck in RUNNING or ABORTED status"
+    ],
+    "solution": [
+      "Check background job log in ERP queue",
+      "Verify fiscal period posting key open in GL settings",
+      "Re-run batch job with administrative override permissions"
+    ],
+    "known_causes": [
+      "Local application configuration mismatch",
+      "Stale user profile AppData temporary files",
+      "Service authentication token mismatch"
+    ],
+    "historical_success_count": 7,
+    "success_rate_pct": 81,
+    "avg_confidence_pct": 85
   },
   {
     "id": "KB-1027",
     "category": "Software Installation",
     "issue": "Software installer requires elevated administrator rights",
-    "symptoms": ["UAC prompt requesting local admin credentials"],
-    "solution": ["Deploy software package via Software Center / Admin By Request (ABR)", "Submit IT privilege elevation request ticket", "Verify software vendor digital signature"]
+    "symptoms": [
+      "UAC prompt requesting local admin credentials"
+    ],
+    "solution": [
+      "Deploy software package via Software Center / Admin By Request (ABR)",
+      "Submit IT privilege elevation request ticket",
+      "Verify software vendor digital signature"
+    ],
+    "known_causes": [
+      "Local application configuration mismatch",
+      "Stale user profile AppData temporary files",
+      "Service authentication token mismatch"
+    ],
+    "historical_success_count": 8,
+    "success_rate_pct": 86,
+    "avg_confidence_pct": 81
   },
   {
     "id": "KB-1028",
     "category": "Software Installation",
     "issue": "MSI installer error 1603",
-    "symptoms": ["Fatal error during installation"],
-    "solution": ["Uninstall older version of software completely", "Clear %TEMP% directory files", "Reinstall package using msiexec /i package.msi /qb /l*v install.log", "Verify Microsoft Visual C++ redistributable prerequisites"]
+    "symptoms": [
+      "Fatal error during installation"
+    ],
+    "solution": [
+      "Uninstall older version of software completely",
+      "Clear %TEMP% directory files",
+      "Reinstall package using msiexec /i package.msi /qb /l*v install.log",
+      "Verify Microsoft Visual C++ redistributable prerequisites"
+    ],
+    "known_causes": [
+      "Local application configuration mismatch",
+      "Stale user profile AppData temporary files",
+      "Service authentication token mismatch"
+    ],
+    "historical_success_count": 10,
+    "success_rate_pct": 87,
+    "avg_confidence_pct": 90
   },
   {
     "id": "KB-1029",
     "category": "Software Installation",
     "issue": "VS Code / Python environment path missing",
-    "symptoms": ["Command 'python' or 'pip' not recognized in terminal"],
-    "solution": ["Add Python install directory to System PATH environment variable", "Select correct Python Interpreter in VS Code (Ctrl+Shift+P)", "Restart terminal instance"]
+    "symptoms": [
+      "Command 'python' or 'pip' not recognized in terminal"
+    ],
+    "solution": [
+      "Add Python install directory to System PATH environment variable",
+      "Select correct Python Interpreter in VS Code (Ctrl+Shift+P)",
+      "Restart terminal instance"
+    ],
+    "known_causes": [
+      "Local application configuration mismatch",
+      "Stale user profile AppData temporary files",
+      "Service authentication token mismatch"
+    ],
+    "historical_success_count": 5,
+    "success_rate_pct": 76,
+    "avg_confidence_pct": 87
   },
   {
     "id": "KB-1030",
     "category": "Hardware",
     "issue": "External monitor not detected over USB-C Dock",
-    "symptoms": ["Display black / Display connection might be limited"],
-    "solution": ["Unplug USB-C dock power cable for 10 seconds to power cycle dock", "Update DisplayLink / Thunderbolt dock firmware driver", "Press Win + P to switch display mode to Extend", "Update GPU driver"]
+    "symptoms": [
+      "Display black / Display connection might be limited"
+    ],
+    "solution": [
+      "Unplug USB-C dock power cable for 10 seconds to power cycle dock",
+      "Update DisplayLink / Thunderbolt dock firmware driver",
+      "Press Win + P to switch display mode to Extend",
+      "Update GPU driver"
+    ],
+    "known_causes": [
+      "Local application configuration mismatch",
+      "Stale user profile AppData temporary files",
+      "Service authentication token mismatch"
+    ],
+    "historical_success_count": 9,
+    "success_rate_pct": 76,
+    "avg_confidence_pct": 82
   },
   {
     "id": "KB-1031",
     "category": "Hardware",
     "issue": "Laptop battery not charging plugged in",
-    "symptoms": ["Battery status: Plugged in, not charging"],
-    "solution": ["Verify AC adapter wattage matches laptop requirement (e.g., 65W/90W)", "Run battery diagnostics in BIOS", "Reinstall Microsoft ACPI-Compliant Control Method Battery driver in Device Manager", "Replace battery if health < 50%"]
+    "symptoms": [
+      "Battery status: Plugged in, not charging"
+    ],
+    "solution": [
+      "Verify AC adapter wattage matches laptop requirement (e.g., 65W/90W)",
+      "Run battery diagnostics in BIOS",
+      "Reinstall Microsoft ACPI-Compliant Control Method Battery driver in Device Manager",
+      "Replace battery if health < 50%"
+    ],
+    "known_causes": [
+      "Local application configuration mismatch",
+      "Stale user profile AppData temporary files",
+      "Service authentication token mismatch"
+    ],
+    "historical_success_count": 9,
+    "success_rate_pct": 81,
+    "avg_confidence_pct": 91
   },
   {
     "id": "KB-1032",
     "category": "Hardware",
     "issue": "USB mouse/keyboard un-responsive on docking station",
-    "symptoms": ["Peripherals freeze intermittently"],
-    "solution": ["Disable USB Selective Suspend in Windows Power Options", "Connect peripherals directly to laptop USB ports to isolate", "Update BIOS firmware"]
+    "symptoms": [
+      "Peripherals freeze intermittently"
+    ],
+    "solution": [
+      "Disable USB Selective Suspend in Windows Power Options",
+      "Connect peripherals directly to laptop USB ports to isolate",
+      "Update BIOS firmware"
+    ],
+    "known_causes": [
+      "Local application configuration mismatch",
+      "Stale user profile AppData temporary files",
+      "Service authentication token mismatch"
+    ],
+    "historical_success_count": 7,
+    "success_rate_pct": 83,
+    "avg_confidence_pct": 88
   },
   {
     "id": "KB-1033",
     "category": "Security",
     "issue": "Suspicious email phishing report",
-    "symptoms": ["External sender impersonating executive with suspicious link"],
-    "solution": ["Do not click links or open attachments", "Click 'Report Phish' button in Outlook ribbon", "SOC automated analyzer quarantines email globally", "Reset user password if credentials were entered"]
+    "symptoms": [
+      "External sender impersonating executive with suspicious link"
+    ],
+    "solution": [
+      "Do not click links or open attachments",
+      "Click 'Report Phish' button in Outlook ribbon",
+      "SOC automated analyzer quarantines email globally",
+      "Reset user password if credentials were entered"
+    ],
+    "known_causes": [
+      "M365 credential manager token expiration",
+      "Corrupted Outlook OST mailbox cache file",
+      "Third-party COM add-in freeze"
+    ],
+    "historical_success_count": 8,
+    "success_rate_pct": 85,
+    "avg_confidence_pct": 88
   },
   {
     "id": "KB-1034",
     "category": "Security",
     "issue": "Antivirus EDR alert: Potential malware isolated",
-    "symptoms": ["CrowdStrike / Defender EDR notification: Threat blocked"],
-    "solution": ["System isolate endpoint automatically via EDR console", "Run full offline antivirus scan", "Submit sample hash to Threat Intelligence team", "Restore clean host state"]
+    "symptoms": [
+      "CrowdStrike / Defender EDR notification: Threat blocked"
+    ],
+    "solution": [
+      "System isolate endpoint automatically via EDR console",
+      "Run full offline antivirus scan",
+      "Submit sample hash to Threat Intelligence team",
+      "Restore clean host state"
+    ],
+    "known_causes": [
+      "Local application configuration mismatch",
+      "Stale user profile AppData temporary files",
+      "Service authentication token mismatch"
+    ],
+    "historical_success_count": 5,
+    "success_rate_pct": 88,
+    "avg_confidence_pct": 88
   },
   {
     "id": "KB-1035",
     "category": "Security",
     "issue": "Request to disable employee Active Directory account (VIP/Term)",
-    "symptoms": ["Security incident detected / Employee offboarding"],
-    "solution": ["Requires IT Admin Approval (Human-in-the-Loop required)", "Disable Active Directory account", "Revoke active OAuth/SAML tokens in Entra ID", "Wipe corporate data from mobile device"]
+    "symptoms": [
+      "Security incident detected / Employee offboarding"
+    ],
+    "solution": [
+      "Requires IT Admin Approval (Human-in-the-Loop required)",
+      "Disable Active Directory account",
+      "Revoke active OAuth/SAML tokens in Entra ID",
+      "Wipe corporate data from mobile device"
+    ],
+    "known_causes": [
+      "Local application configuration mismatch",
+      "Stale user profile AppData temporary files",
+      "Service authentication token mismatch"
+    ],
+    "historical_success_count": 9,
+    "success_rate_pct": 79,
+    "avg_confidence_pct": 80
   },
   {
     "id": "KB-1036",
     "category": "Security",
     "issue": "USB Mass Storage drive blocked by policy",
-    "symptoms": ["Access is denied error when inserting USB drive"],
-    "solution": ["USB storage devices are restricted by Data Loss Prevention (DLP) policy", "Use corporate OneDrive or secure cloud transfer portal", "Submit business justification for temporary DLP exemption"]
+    "symptoms": [
+      "Access is denied error when inserting USB drive"
+    ],
+    "solution": [
+      "USB storage devices are restricted by Data Loss Prevention (DLP) policy",
+      "Use corporate OneDrive or secure cloud transfer portal",
+      "Submit business justification for temporary DLP exemption"
+    ],
+    "known_causes": [
+      "Active Directory security policy lockout threshold reached",
+      "Expired domain password cached in Windows Credential Manager",
+      "MFA device registration sync delay"
+    ],
+    "historical_success_count": 15,
+    "success_rate_pct": 94,
+    "avg_confidence_pct": 95
   },
   {
     "id": "KB-1037",
     "category": "VPN",
     "issue": "GlobalProtect error: Gateway certificate verification failed",
-    "symptoms": ["Certificate invalid error during connection"],
-    "solution": ["Install updated intermediate Enterprise Root CA certificate", "Re-sync machine certificates via Group Policy (gpupdate /force)", "Reconnect VPN client"]
+    "symptoms": [
+      "Certificate invalid error during connection"
+    ],
+    "solution": [
+      "Install updated intermediate Enterprise Root CA certificate",
+      "Re-sync machine certificates via Group Policy (gpupdate /force)",
+      "Reconnect VPN client"
+    ],
+    "known_causes": [
+      "VPN client configuration mismatch",
+      "Outdated VPN client software version",
+      "DNS routing or network interface MTU mismatch"
+    ],
+    "historical_success_count": 7,
+    "success_rate_pct": 86,
+    "avg_confidence_pct": 91
   },
   {
     "id": "KB-1038",
     "category": "Outlook",
     "issue": "Teams add-in missing in Outlook",
-    "symptoms": ["New Teams Meeting button missing from Outlook calendar ribbon"],
-    "solution": ["Verify Teams meeting add-in is enabled in Outlook Options -> Add-ins", "Re-register Microsoft.Teams.AddinLoader.dll via regsvr32", "Restart Outlook and Teams apps"]
+    "symptoms": [
+      "New Teams Meeting button missing from Outlook calendar ribbon"
+    ],
+    "solution": [
+      "Verify Teams meeting add-in is enabled in Outlook Options -> Add-ins",
+      "Re-register Microsoft.Teams.AddinLoader.dll via regsvr32",
+      "Restart Outlook and Teams apps"
+    ],
+    "known_causes": [
+      "M365 credential manager token expiration",
+      "Corrupted Outlook OST mailbox cache file",
+      "Third-party COM add-in freeze"
+    ],
+    "historical_success_count": 8,
+    "success_rate_pct": 85,
+    "avg_confidence_pct": 88
   },
   {
     "id": "KB-1039",
     "category": "Windows",
     "issue": "Workstation domain trust relationship failed",
-    "symptoms": ["The trust relationship between this workstation and the primary domain failed"],
-    "solution": ["Log in with local administrator account", "Unjoin machine from domain to Workgroup, reboot", "Rejoin machine to domain using domain admin credentials", "Reboot machine"]
+    "symptoms": [
+      "The trust relationship between this workstation and the primary domain failed"
+    ],
+    "solution": [
+      "Log in with local administrator account",
+      "Unjoin machine from domain to Workgroup, reboot",
+      "Rejoin machine to domain using domain admin credentials",
+      "Reboot machine"
+    ],
+    "known_causes": [
+      "Local application configuration mismatch",
+      "Stale user profile AppData temporary files",
+      "Service authentication token mismatch"
+    ],
+    "historical_success_count": 8,
+    "success_rate_pct": 81,
+    "avg_confidence_pct": 83
   },
   {
     "id": "KB-1040",
     "category": "Password",
     "issue": "LAPS Local Admin password retrieval",
-    "symptoms": ["IT Support technician requires local admin access"],
-    "solution": ["Query LAPS password via Active Directory Users & Computers or Azure Portal", "LAPS password auto-rotates every 24 hours"]
+    "symptoms": [
+      "IT Support technician requires local admin access"
+    ],
+    "solution": [
+      "Query LAPS password via Active Directory Users & Computers or Azure Portal",
+      "LAPS password auto-rotates every 24 hours"
+    ],
+    "known_causes": [
+      "Active Directory security policy lockout threshold reached",
+      "Expired domain password cached in Windows Credential Manager",
+      "MFA device registration sync delay"
+    ],
+    "historical_success_count": 15,
+    "success_rate_pct": 94,
+    "avg_confidence_pct": 95
   },
   {
     "id": "KB-1041",
     "category": "ERP",
     "issue": "Salesforce CRM sync error with SAP ERP",
-    "symptoms": ["Customer record update failed to sync"],
-    "solution": ["Check MuleSoft IPaaS integration middleware logs", "Re-trigger failed queue payload manually", "Verify field mapping rules"]
+    "symptoms": [
+      "Customer record update failed to sync"
+    ],
+    "solution": [
+      "Check MuleSoft IPaaS integration middleware logs",
+      "Re-trigger failed queue payload manually",
+      "Verify field mapping rules"
+    ],
+    "known_causes": [
+      "Local application configuration mismatch",
+      "Stale user profile AppData temporary files",
+      "Service authentication token mismatch"
+    ],
+    "historical_success_count": 8,
+    "success_rate_pct": 83,
+    "avg_confidence_pct": 88
   },
   {
     "id": "KB-1042",
     "category": "Security",
     "issue": "Unusual login activity alert from unexpected location",
-    "symptoms": ["Entra ID Impossible Travel alert"],
-    "solution": ["Contact employee to verify travel status", "If unconfirmed, trigger Risk Remediation: Revoke sessions and force password reset", "Require FIDO2 hardware key authentication"]
+    "symptoms": [
+      "Entra ID Impossible Travel alert"
+    ],
+    "solution": [
+      "Contact employee to verify travel status",
+      "If unconfirmed, trigger Risk Remediation: Revoke sessions and force password reset",
+      "Require FIDO2 hardware key authentication"
+    ],
+    "known_causes": [
+      "Local application configuration mismatch",
+      "Stale user profile AppData temporary files",
+      "Service authentication token mismatch"
+    ],
+    "historical_success_count": 9,
+    "success_rate_pct": 86,
+    "avg_confidence_pct": 84
   }
 ]

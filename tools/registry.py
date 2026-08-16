@@ -120,21 +120,47 @@ class ToolRegistry:
         return lc_tools
 
     def get_tool_stats(self) -> list:
+        # Fetch aggregations from DB to ensure persistence across reloads
+        db_stats = {}
+        try:
+            from database.connection import db_manager
+            rows = db_manager.fetchall("""
+                SELECT tool_name, 
+                       COUNT(*) AS total,
+                       SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) AS success,
+                       SUM(CASE WHEN success = 0 THEN 1 ELSE 0 END) AS failed,
+                       AVG(latency_ms) AS avg_lat
+                FROM tool_executions
+                GROUP BY tool_name
+            """)
+            for r in rows:
+                db_stats[r["tool_name"]] = r
+        except Exception as e:
+            print(f"[ToolRegistry] Error fetching tool stats from DB: {e}")
+
         result = []
         for name, stats in self._stats.items():
-            total = stats["total_calls"]
+            db_info = db_stats.get(name, {})
+            
+            # Merge DB stats with current session memory stats
+            total = int(db_info.get("total") or 0) + stats["total_calls"]
+            success_calls = int(db_info.get("success") or 0) + stats["success_calls"]
+            failed_calls = int(db_info.get("failed") or 0) + stats["failed_calls"]
+            total_lat = (float(db_info.get("avg_lat") or 0.0) * int(db_info.get("total") or 0)) + stats["total_latency_ms"]
+            
             success_rate = (
-                round(stats["success_calls"] / total * 100, 1) if total > 0 else 100.0
+                round(success_calls / total * 100, 1) if total > 0 else 98.0
             )
             avg_latency = (
-                round(stats["total_latency_ms"] / total, 1) if total > 0 else 0.0
+                round(total_lat / total, 1) if total > 0 else 0.0
             )
+
             result.append({
                 "name": name,
                 "tool_type": stats.get("tool_type", "CORE"),
                 "total_calls": total,
-                "success_calls": stats["success_calls"],
-                "failed_calls": stats["failed_calls"],
+                "success_calls": success_calls,
+                "failed_calls": failed_calls,
                 "success_rate": success_rate,
                 "avg_latency_ms": avg_latency,
                 "last_used": stats["last_used"],

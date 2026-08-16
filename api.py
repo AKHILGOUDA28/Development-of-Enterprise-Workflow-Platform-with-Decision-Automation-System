@@ -125,6 +125,10 @@ class FailureSimulateRequest(BaseModel):
 class ApprovalDecisionRequest(BaseModel):
     admin_notes: Optional[str] = "Action reviewed and approved by IT Admin."
 
+class ConfirmResolutionRequest(BaseModel):
+    """Employee's response to a guided resolution: resolved=True means fixed, False means still broken."""
+    resolved: bool
+
 # Global last benchmark result storage
 LAST_BENCHMARK_RESULTS = {}
 
@@ -212,27 +216,41 @@ def ask_question(request: QuestionRequest, current_user: dict = Depends(verify_t
 
         import config
         run_mode = "Demo / Simulation Mode" if config.IS_MOCK else "Real-Time Groq Native LLM Output"
+        
+        res_steps = result.get("resolution_steps") or []
+        res_title = result.get("resolution_title") or ""
+        confidence_val = result.get("confidence", 85.0)
+        confidence_label = "HIGH" if confidence_val >= 85 else "MEDIUM" if confidence_val >= 60 else "LOW"
 
         return {
-            "success": True,
-            "incident_id": result.get("incident_id"),
-            "employee_id": emp_id,
-            "query": result.get("query"),
-            "plan": result.get("plan"),
-            "research": result.get("research"),
-            "analysis": result.get("analysis"),
-            "severity": result.get("severity", "Medium"),
-            "confidence": result.get("confidence", 85.0),
-            "is_high_risk": result.get("is_high_risk", False),
-            "decision": result.get("decision"),
-            "status": result.get("status", "AUTO-RESOLUTION"),
-            "requires_approval": result.get("requires_approval", False),
-            "approval_action": result.get("approval_action"),
-            "answer": result.get("answer"),
-            "timings": result.get("timings", {}),
-            "mode": run_mode,
-            "session_id": result.get("session_id"),
-            "audit_trail": logs
+            "success":          True,
+            "incident_id":      result.get("incident_id"),
+            "employee_id":      emp_id,
+            "query":            result.get("query"),
+            "plan":             result.get("plan"),
+            "research":         result.get("research"),
+            "analysis":         result.get("analysis"),
+            "severity":         result.get("severity", "Medium"),
+            "confidence":       confidence_val,
+            "confidence_label": confidence_label,
+            "is_high_risk":     result.get("is_high_risk", False),
+            "is_solvable":      result.get("is_solvable", True),
+            "decision":         result.get("decision"),
+            "status":           result.get("status", "AWAITING_USER_CONFIRMATION"),
+            "requires_approval":result.get("requires_approval", False),
+            "approval_action":  result.get("approval_action"),
+            "answer":           result.get("answer"),
+            "resolution": {
+                "title": res_title,
+                "steps": res_steps
+            },
+            "resolution_steps": res_steps,
+            "resolution_title": res_title,
+            "ticket_id":        result.get("ticket_id", ""),
+            "timings":          result.get("timings", {}),
+            "mode":             run_mode,
+            "session_id":       result.get("session_id"),
+            "audit_trail":      logs
         }
     except Exception as e:
         import traceback
@@ -317,6 +335,410 @@ def update_incident_status(incident_id: str, update_data: IncidentUpdate, curren
         (incident_id, now, current_user.get("username", "IT Admin"), "status_update", f"Status manually updated to {update_data.status}")
     )
     return {"message": f"Incident {incident_id} status updated to {update_data.status}"}
+
+@app.post("/incidents/{incident_id}/resolve", tags=["Incidents"])
+def resolve_incident_by_employee(incident_id: str, current_user: dict = Depends(verify_token)):
+    """Legacy convenience endpoint — delegates to confirm-resolution with resolved=True."""
+    return confirm_resolution(
+        incident_id=incident_id,
+        body=ConfirmResolutionRequest(resolved=True),
+        background_tasks=BackgroundTasks(),
+        current_user=current_user
+    )
+
+@app.post("/incidents/{incident_id}/escalate", tags=["Incidents"])
+def escalate_incident_by_employee(incident_id: str, current_user: dict = Depends(verify_token)):
+    """Legacy convenience endpoint — forces final escalation regardless of attempt count."""
+    import random as _random
+    row = db_manager.fetchone("SELECT * FROM incidents WHERE incident_id = ?", (incident_id,))
+    if not row:
+        raise HTTPException(status_code=404, detail="Incident not found")
+    if current_user.get("role") == "Employee" and row.get("employee_id") != current_user.get("employee_id"):
+        raise HTTPException(status_code=403, detail="Access denied.")
+
+    # Force attempt_count to MAX so confirm-resolution goes straight to escalation
+    now = datetime.now(timezone.utc).isoformat() + "Z"
+    db_manager.execute(
+        "UPDATE incidents SET resolution_attempt_count = 2, updated_at = ? WHERE incident_id = ?",
+        (now, incident_id)
+    )
+    return confirm_resolution(
+        incident_id=incident_id,
+        body=ConfirmResolutionRequest(resolved=False),
+        background_tasks=BackgroundTasks(),
+        current_user=current_user
+    )
+
+@app.post("/incidents/{incident_id}/retry", tags=["Incidents"])
+def retry_incident_resolution(incident_id: str, background_tasks: BackgroundTasks, current_user: dict = Depends(verify_token)):
+    """Legacy convenience endpoint — delegates to confirm-resolution with resolved=False."""
+    return confirm_resolution(
+        incident_id=incident_id,
+        body=ConfirmResolutionRequest(resolved=False),
+        background_tasks=background_tasks,
+        current_user=current_user
+    )
+
+# --------------------------------------------------
+# PRIMARY: Employee Confirmation Endpoint
+# --------------------------------------------------
+MAX_GUIDED_ATTEMPTS = 2
+
+def send_email_bg(to: str, subject: str, body: str):
+    try:
+        from tools.registry import tool_registry
+        email_tool = tool_registry.get_tool("email")
+        email_tool.run(to=to, subject=subject, body=body)
+    except Exception as e:
+        print(f"[!] Background email sending failed: {e}")
+
+@app.post("/incidents/{incident_id}/confirm-resolution", tags=["Incidents"])
+def confirm_resolution(
+    incident_id: str,
+    body: ConfirmResolutionRequest,
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(verify_token)
+):
+    """
+    Primary employee confirmation endpoint.
+
+    POST body: {"resolved": true}  → Mark incident RESOLVED, save verified pattern to long-term memory.
+    POST body: {"resolved": false} → If attempts < MAX: retry with alternative AI investigation.
+                                     If attempts >= MAX: policy-protected escalation with rich AI ticket.
+    """
+    import random
+    row = db_manager.fetchone("SELECT * FROM incidents WHERE incident_id = ?", (incident_id,))
+    if not row:
+        raise HTTPException(status_code=404, detail="Incident not found.")
+
+    # RBAC ownership check
+    if current_user.get("role") == "Employee" and row.get("employee_id") != current_user.get("employee_id"):
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied: Employees can only confirm their own incidents."
+        )
+
+    now    = datetime.now(timezone.utc).isoformat() + "Z"
+    emp_id = current_user.get("employee_id") or row.get("employee_id", "EMP1024")
+
+    # -----------------------------------------------------------
+    # CASE A: Employee says "Yes, It's Fixed" → RESOLVED
+    # -----------------------------------------------------------
+    if body.resolved:
+        db_manager.execute("""
+            UPDATE incidents
+            SET status='RESOLVED', user_confirmed_resolution=1,
+                resolution_confirmed_at=?, updated_at=?
+            WHERE incident_id=?
+        """, (now, now, incident_id))
+
+        db_manager.execute("""
+            INSERT INTO audit_logs (incident_id, timestamp, agent_or_system, event_type, description, payload)
+            VALUES (?, ?, 'employee', 'incident_resolved', ?, ?)
+        """, (
+            incident_id, now,
+            f"Incident RESOLVED. Employee ({emp_id}) confirmed guided resolution was successful.",
+            json.dumps({"confirmation": "employee", "actor": emp_id,
+                        "resolution": row.get("resolution_strategy", "Guided Resolution")})
+        ))
+
+        # Save VERIFIED pattern to long-term memory
+        try:
+            category     = row.get("category", "General IT")
+            res_steps    = row.get("resolution_steps", "")
+            memory_key   = f"verified_resolution_{category.lower().replace(' ', '_').replace('/', '_')}"
+            long_memory.store(memory_key, json.dumps({
+                "category":         category,
+                "issue_pattern":    row.get("issue", "")[:120],
+                "resolution_title": row.get("resolution_strategy", ""),
+                "resolution_steps": res_steps,
+                "confidence":       "High",
+                "verified_by":      "employee_confirmation",
+                "success":          True,
+                "resolved_at":      now
+            }))
+        except Exception as mem_err:
+            print(f"[!] Long-term memory update warning: {mem_err}")
+
+        bus.publish(
+            publisher="confirm_resolution_api",
+            event_type="resolution_confirmed",
+            payload={"incident_id": incident_id, "employee_id": emp_id},
+            session_id="global"
+        )
+
+        return {
+            "incident_id": incident_id,
+            "status":      "RESOLVED",
+            "message":     "Your issue has been marked as resolved. Thank you for confirming! No IT support ticket was needed."
+        }
+
+    # -----------------------------------------------------------
+    # CASE B: Employee says "No, Still Not Working"
+    # -----------------------------------------------------------
+    attempt_count = int(row.get("resolution_attempt_count") or 0)
+
+    bus.publish(
+        publisher="confirm_resolution_api",
+        event_type="resolution_rejected",
+        payload={"incident_id": incident_id, "attempt_count": attempt_count},
+        session_id="global"
+    )
+
+    # Build accumulated failed-attempts list
+    previous_steps_raw = row.get("last_resolution_attempt") or row.get("resolution_steps") or ""
+    try:
+        previous_steps = json.loads(previous_steps_raw) if previous_steps_raw.startswith(("[", "{")) else [previous_steps_raw]
+    except Exception:
+        previous_steps = [previous_steps_raw] if previous_steps_raw else []
+
+    # Retrieve any already-stored attempts history
+    attempts_history: List[str] = []
+    try:
+        hist_raw = row.get("last_resolution_attempt") or "[]"
+        parsed   = json.loads(hist_raw)
+        attempts_history = parsed if isinstance(parsed, list) else [str(parsed)]
+    except Exception:
+        if previous_steps:
+            attempts_history = previous_steps
+
+    # -----------------------------------------------------------
+    # CASE B1: Under MAX attempts → Retry with alternative solution
+    # -----------------------------------------------------------
+    if attempt_count < MAX_GUIDED_ATTEMPTS:
+        new_count = attempt_count + 1
+
+        # Add current steps to history for retry context
+        current_steps_raw = row.get("resolution_steps") or ""
+        try:
+            current_steps = json.loads(current_steps_raw) if current_steps_raw.startswith("[") else [current_steps_raw]
+        except Exception:
+            current_steps = [current_steps_raw] if current_steps_raw else []
+        
+        if current_steps and current_steps not in [json.loads(a) if a.startswith("[") else [a] for a in attempts_history]:
+            attempts_history.extend(current_steps)
+
+        db_manager.execute("""
+            UPDATE incidents
+            SET status='INVESTIGATING',
+                resolution_attempt_count=?,
+                last_resolution_attempt=?,
+                updated_at=?
+            WHERE incident_id=?
+        """, (new_count, json.dumps(attempts_history), now, incident_id))
+
+        db_manager.execute("""
+            INSERT INTO audit_logs (incident_id, timestamp, agent_or_system, event_type, description, payload)
+            VALUES (?, ?, 'system', 'retry_investigation_started', ?, ?)
+        """, (
+            incident_id, now,
+            f"Retry Attempt {new_count}: Employee confirmed solution failed. Starting alternative AI investigation.",
+            json.dumps({"attempt": new_count, "previous_steps_count": len(attempts_history)})
+        ))
+
+        bus.publish(
+            publisher="confirm_resolution_api",
+            event_type="retry_investigation_started",
+            payload={"incident_id": incident_id, "attempt": new_count},
+            session_id="global"
+        )
+
+        # Launch alternative investigation in background with previous-attempts context
+        background_tasks.add_task(
+            run_workflow,
+            query=row.get("issue", ""),
+            employee_id=row.get("employee_id", emp_id),
+            session_id=str(uuid.uuid4())[:8].upper(),
+            incident_id=incident_id,
+            previous_attempts=attempts_history,
+            attempt_count=new_count
+        )
+
+        return {
+            "incident_id":   incident_id,
+            "status":        "INVESTIGATING",
+            "attempt_number": new_count,
+            "message": (
+                f"Attempt {new_count - 1} didn't work — we're sorry! "
+                f"Our AI agents are now looking for an alternative solution. "
+                f"Please check back in a moment."
+            )
+        }
+
+    # -----------------------------------------------------------
+    # CASE B2: MAX attempts reached → Policy-protected escalation
+    # -----------------------------------------------------------
+    # Duplicate ticket guard
+    existing_tkt = row.get("ticket_number") or row.get("ticket_id")
+    if existing_tkt and str(existing_tkt).startswith("TKT-"):
+        return {
+            "incident_id":   incident_id,
+            "status":        "ESCALATED",
+            "ticket_number": existing_tkt,
+            "message": (
+                f"This incident already has active support ticket {existing_tkt}. "
+                f"IT Support is working on your issue — you don't need to submit again."
+            )
+        }
+
+    # Build full AI investigation ticket context
+    attempts_text = ""
+    all_failed = attempts_history or [row.get("resolution_steps", "N/A")]
+    for i, attempt in enumerate(all_failed, 1):
+        try:
+            steps = json.loads(attempt) if isinstance(attempt, str) and attempt.startswith("[") else [attempt]
+            formatted = "\n".join(f"     {j+1}. {s}" for j, s in enumerate(steps))
+        except Exception:
+            formatted = f"     {attempt}"
+        attempts_text += f"\n  Attempt {i}:\n{formatted}\n  → Employee Result: FAILED\n"
+
+    rich_ticket_body = f"""=== AI-ESCALATED IT SUPPORT TICKET ===
+
+EMPLOYEE:         {emp_id}
+INCIDENT ID:      {incident_id}
+
+ORIGINAL ISSUE:
+{row.get('issue', 'N/A')}
+
+AI DIAGNOSIS:
+  Category:       {row.get('category', 'General IT')}
+  Root Cause:     {row.get('resolution_strategy', 'Under investigation')}
+  Severity:       {row.get('severity', 'Medium')}
+  AI Confidence:  {row.get('confidence', 'N/A')}%
+
+EVIDENCE COLLECTED:
+  ✓ Knowledge Base articles searched
+  ✓ Historical incident patterns matched
+  ✓ Infrastructure health verified
+  ✓ Maintenance windows checked
+
+GUIDED SOLUTIONS ATTEMPTED:{attempts_text if attempts_text else chr(10) + '  No prior attempts.'}
+ESCALATION REASON:
+  Employee confirmed issue persists after {attempt_count + 1} guided resolution attempt(s).
+  Maximum guided attempts ({MAX_GUIDED_ATTEMPTS}) reached.
+
+AI RECOMMENDATION TO IT SUPPORT:
+  The standard guided resolution approaches have been exhausted.
+  Recommended next steps for IT Support to investigate:
+    - {row.get('category', 'General IT')} client installation / version compatibility
+    - Network / DNS configuration and connectivity
+    - User account / session state and permissions
+    - Infrastructure-side issues not detectable from the employee endpoint
+    - Consider remote support session with the employee.
+"""
+
+    # Policy Engine security boundary check before creating ticket
+    tkt_num = f"TKT-{random.randint(10000, 99999)}"
+    policy_allowed = True
+    try:
+        from services.policy_engine import policy_engine as _pe
+        pol_decision, pol_reason = _pe.evaluate(
+            action="create_ticket",
+            role="IT Support",
+            severity=row.get("severity", "Medium"),
+            approved=False,
+            incident_id=incident_id
+        )
+        bus.publish(
+            publisher="confirm_resolution_api",
+            event_type="escalation_started",
+            payload={"incident_id": incident_id, "policy_decision": pol_decision},
+            session_id="global"
+        )
+        if pol_decision == "BLOCKED":
+            policy_allowed = False
+    except Exception as pe_err:
+        print(f"[!] Policy engine warning during escalation: {pe_err}")
+
+    if policy_allowed:
+        bus.publish(
+            publisher="confirm_resolution_api",
+            event_type="ticket_creation_started",
+            payload={"incident_id": incident_id},
+            session_id="global"
+        )
+        try:
+            tkt_tool = tool_registry.get_tool("ticket_system")
+            tkt_res  = tkt_tool.run(user=emp_id, issue=rich_ticket_body, priority=row.get("severity", "Medium"))
+            if tkt_res.get("success"):
+                tkt_num = tkt_res.get("ticket_id") or tkt_num
+        except Exception as tkt_err:
+            print(f"[!] Ticket tool warning: {tkt_err}")
+
+    db_manager.execute("""
+        UPDATE incidents
+        SET status='ESCALATED', ticket_number=?, ticket_id=?,
+            escalation_reason=?, updated_at=?
+        WHERE incident_id=?
+    """, (
+        tkt_num,
+        tkt_num,
+        f"Max guided attempts ({attempt_count + 1}) reached. Employee confirmed issue persists.",
+        now,
+        incident_id
+    ))
+
+    db_manager.execute("""
+        INSERT INTO audit_logs (incident_id, timestamp, agent_or_system, event_type, description, payload)
+        VALUES (?, ?, 'system', 'ticket_created', ?, ?)
+    """, (
+        incident_id, now,
+        f"Ticket {tkt_num} created with full AI investigation context after {attempt_count + 1} failed attempt(s).",
+        json.dumps({"ticket_number": tkt_num, "attempts": attempt_count + 1})
+    ))
+
+    bus.publish(
+        publisher="confirm_resolution_api",
+        event_type="ticket_created",
+        payload={"incident_id": incident_id, "ticket_number": tkt_num},
+        session_id="global"
+    )
+
+    # Notify IT Support with full AI context in background
+    background_tasks.add_task(
+        send_email_bg,
+        to="support@enterprise.com",
+        subject=f"[AI-ESCALATED] {tkt_num} | {row.get('category', 'IT')} | {emp_id} | {attempt_count + 1} attempt(s) failed",
+        body=rich_ticket_body
+    )
+
+    # Notify Employee in background
+    emp_email_body = (
+        f"Hello,\n\n"
+        f"Your issue could not be resolved using the AI-guided troubleshooting steps.\n\n"
+        f"An IT Support ticket has been created:\n\n"
+        f"  Ticket Number:  {tkt_num}\n"
+        f"  Incident ID:    {incident_id}\n\n"
+        f"IT Support has received:\n"
+        f"  • Your original issue description\n"
+        f"  • AI investigation results and root cause diagnosis\n"
+        f"  • All evidence collected\n"
+        f"  • All {attempt_count + 1} troubleshooting step(s) already attempted\n"
+        f"  • Your confirmation that the issue remains unresolved\n\n"
+        f"You do NOT need to submit the issue again. An IT technician will be in touch shortly."
+    )
+    background_tasks.add_task(
+        send_email_bg,
+        to=f"{emp_id.lower()}@enterprise.com",
+        subject=f"IT Support Ticket {tkt_num} Created — {row.get('category', 'IT Issue')}",
+        body=emp_email_body
+    )
+
+    return {
+        "incident_id":   incident_id,
+        "status":        "ESCALATED",
+        "ticket_number": tkt_num,
+        "message": (
+            f"An IT Support ticket ({tkt_num}) has been created with the complete AI investigation attached. "
+            f"IT Support has been notified and will contact you shortly."
+        ),
+        "ticket_context": {
+            "employee":      emp_id,
+            "ai_diagnosis":  row.get("resolution_strategy", "N/A"),
+            "attempts":      attempt_count + 1,
+            "evidence":      ["Knowledge Base", "Incident DB", "Infrastructure Monitor", "Calendar"]
+        }
+    }
 
 # --------------------------------------------------
 # Human-In-The-Loop (HITL) Approval Queue Endpoints
@@ -838,16 +1260,19 @@ def get_user_profile(current_user: dict = Depends(verify_token)):
     if not emp:
         emp = {
             "employee_id": emp_id,
-            "name": current_user.get("name", "Akhil Kumar"),
-            "email": current_user.get("email", "akhil@enterprise.com"),
+            "name": current_user.get("name", "Akhil Gouda"),
+            "email": current_user.get("email", "akhil@company.com"),
             "department": "Engineering",
-            "title": "Senior Software Engineer",
-            "manager": "Alex Morgan",
-            "phone": "+1 (555) 019-2834",
-            "location": "Building A, Floor 3",
-            "hire_date": "2023-03-15",
-            "is_vip": 0
+            "role": current_user.get("role", "Employee"),
+            "title": "Software Engineer",
+            "manager": "Karthik",
+            "phone": "+91 98765 43210",
+            "location": "Hyderabad",
+            "hire_date": "2024-01-15",
+            "is_vip": 1
         }
+    else:
+        emp["role"] = current_user.get("role", "Employee")
     return emp
 
 

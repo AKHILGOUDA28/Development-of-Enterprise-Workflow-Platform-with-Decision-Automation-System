@@ -77,15 +77,10 @@ def get_mock_decision(state: dict) -> dict:
     is_high_risk = state.get("is_high_risk", False)
     query = state.get("query", "")
 
-    if is_high_risk or (60.0 <= conf < 85.0):
-        status = "PENDING_APPROVAL"
-        action = f"Human Approval Required: High-risk enterprise action for '{query[:40]}'"
-        reason = f"Confidence is {int(conf)}% or requires elevated IT Admin privilege."
-        requires_app = True
-    elif conf >= 85.0:
-        status = "AUTO-RESOLUTION"
-        action = "AUTO-FIX"
-        reason = f"Confidence ({int(conf)}%) exceeds 85% auto-resolution threshold."
+    if conf >= 60.0:
+        status = "GUIDED_RESOLUTION"
+        action = "GUIDED_RESOLUTION"
+        reason = f"Confidence ({int(conf)}%) is sufficient for AI-guided self-remediation instructions."
         requires_app = False
     else:
         status = "ESCALATION"
@@ -94,13 +89,13 @@ def get_mock_decision(state: dict) -> dict:
         requires_app = False
 
     text = f"""Decision Lifecycle Summary:
-- Incident Status: {status}
+- Incident Status: {status} (Awaiting Employee Confirmation)
 - Decision Strategy: {action}
 - Confidence Score: {int(conf)}%
 - Rationale: {reason}
 
 Actions Taken:
-{"- Paused in Approval Queue for IT Admin review." if requires_app else ("- Applied automated resolution path." if status == "AUTO-RESOLUTION" else "- Created incident escalation ticket.")}"""
+{"- Paused in Approval Queue for IT Admin review." if requires_app else ("- Generated step-by-step remediation procedure for employee." if status == "GUIDED_RESOLUTION" else "- Created incident escalation ticket.")}"""
 
     return {
         "text": text,
@@ -127,19 +122,14 @@ def decision_agent(state: dict) -> dict:
 
     # Determine Lifecycle Status based on Confidence & Risk Rules
     if state.get("approved"):
-        lifecycle_status = "AUTO-RESOLUTION"
-        decision_action = "AUTO-FIX"
-        decision_reason = "IT Admin approval granted. Initiating automated remediation."
+        lifecycle_status = "GUIDED_RESOLUTION"
+        decision_action = "GUIDED_RESOLUTION"
+        decision_reason = "IT Admin approval granted. Initiating guided remediation."
         requires_approval = False
-    elif is_high_risk or (60.0 <= conf < 85.0):
-        lifecycle_status = "PENDING_APPROVAL"
-        decision_action = "REQUIRE_APPROVAL"
-        decision_reason = f"Action involves high-risk privileges or confidence ({int(conf)}%) requires human verification."
-        requires_approval = True
-    elif conf >= 85.0:
-        lifecycle_status = "AUTO-RESOLUTION"
-        decision_action = "AUTO-FIX"
-        decision_reason = f"High confidence ({int(conf)}%) allows automated self-healing."
+    elif conf >= 60.0:
+        lifecycle_status = "GUIDED_RESOLUTION"
+        decision_action = "GUIDED_RESOLUTION"
+        decision_reason = f"Confidence ({int(conf)}%) is sufficient for AI-guided self-healing."
         requires_approval = False
     else:
         lifecycle_status = "ESCALATION"
@@ -175,7 +165,7 @@ def decision_agent(state: dict) -> dict:
             "You are an IT Support Decision Agent.\n"
             f"The Incident Status is determined as: {lifecycle_status}.\n"
             "If status is ESCALATION, invoke `ticket_system` tool to create a ticket and `email` to inform the user.\n"
-            "If status is AUTO-RESOLUTION, invoke `email` tool to send remediation steps.\n"
+            "If status is GUIDED_RESOLUTION, invoke `email` tool to send remediation steps to the employee.\n"
             "If status is PENDING_APPROVAL, issue notification to approval queue."
         ))
 
