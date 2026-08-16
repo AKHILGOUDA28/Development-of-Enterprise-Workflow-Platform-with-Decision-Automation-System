@@ -78,6 +78,7 @@ RESOLVED    🔄 Retry
                   │
                   ▼
               IT Support
+---
 
 ## 🤖 AI Agents
 
@@ -645,59 +646,6 @@ The project tests:
 
 ---
 
-## 🏗️ Overall Architecture
-
-👤 Employee
-     │
-     ▼
-🌐 FastAPI
-     │
-     ▼
-🔄 LangGraph Workflow
-     │
-     ▼
-🗂️ Planner Agent
-     │
-     ▼
-🔍 Researcher Agent
-     │
-     ├── 📚 Knowledge Base
-     ├── 🗃️ Incident Database
-     ├── 👥 HR System
-     ├── 🏢 Infrastructure
-     ├── 📅 Calendar
-     └── 🌐 Web Search
-     │
-     ▼
-📊 Analysis Agent
-     │
-     ▼
-⚖️ Decision Agent
-     │
-     ├── ✅ Guided Resolution
-     │
-     └── 🎫 Escalation
-              │
-              ▼
-         🛠️ IT Support
-     
-     Guided Resolution
-              │
-              ▼
-        👤 Employee
-              │
-        ┌─────┴─────┐
-        ▼           ▼
-      Fixed      Not Fixed
-        │           │
-        ▼           ▼
-    ✅ Resolved   🔄 Retry
-                    │
-                    ▼
-              Alternative Steps
-                    │
-                    ▼
-                 🎫 Ticket
 
 ## 🎯 One-Line Description
 
