@@ -6,46 +6,78 @@ and raises a support ticket when the issue cannot be solved.
 
 ---
 
-## 🎯 How It Works
+## 🔄 Complete Agent + Tool Workflow
 
-Employee reports an IT issue
-        ↓
-Planner Agent
-        ↓
-Researcher Agent
-        ↓
-Uses Enterprise Tools
-        ↓
-Analysis Agent
-        ↓
-Root Cause + Confidence Score
-        ↓
-Decision Agent
-        ↓
- ┌───────────────┬────────────────┐
- │               │                │
-Solvable      Not Solvable       │
- │               │                │
- ↓               ↓                │
-Guided         Ticket             │
-Solution       Raised             │
- │               ↓                │
- ↓           IT Support           │
-Employee                          │
-tries steps                       │
- │                                 │
- ├── Solved → RESOLVED             │
- │                                 │
- └── Not Solved → Retry            │
-                    ↓
-              Alternative Steps
-                    ↓
-              Still Not Solved
-                    ↓
-                IT Support
-
-
----
+Employee Reports IT Issue
+          │
+          ▼
+     🗂️ Planner Agent
+          │
+          │ Creates investigation plan
+          ▼
+    🔍 Researcher Agent
+          │
+          │ Uses tools to collect evidence
+          ▼
+   ┌──────────────────────┐
+   │      ENTERPRISE      │
+   │        TOOLS         │
+   ├──────────────────────┤
+   │ 📚 Knowledge Base    │
+   │ 🗃️ Incident Database │
+   │ 👥 HR System         │
+   │ 🏢 Infrastructure    │
+   │ 📅 Calendar          │
+   │ 🌐 Web Search        │
+   └──────────┬───────────┘
+              │
+              │ Evidence
+              ▼
+       📊 Analysis Agent
+              │
+              │ Root Cause
+              │ Severity
+              │ Confidence
+              ▼
+       ⚖️ Decision Agent
+              │
+        ┌─────┴─────┐
+        │           │
+        ▼           ▼
+   Confidence    Low Confidence
+     >= 60%          < 60%
+        │              │
+        ▼              ▼
+  Guided Solution   🎫 Create Ticket
+        │              │
+        ▼              ▼
+    Employee       IT Support
+      Tries
+        │
+   ┌────┴────┐
+   │         │
+   ▼         ▼
+  Fixed    Not Fixed
+   │         │
+   ▼         ▼
+RESOLVED    🔄 Retry
+             │
+             ▼
+      Alternative Solution
+             │
+             ▼
+       Employee Tries Again
+             │
+        ┌────┴────┐
+        │         │
+        ▼         ▼
+      Fixed    Still Failed
+        │         │
+        ▼         ▼
+    RESOLVED  🎫 Create Ticket
+                  │
+                  ▼
+              IT Support
 
 ## 🤖 AI Agents
 
@@ -613,32 +645,59 @@ The project tests:
 
 ---
 
-## ⭐ Main Idea
+## 🏗️ Overall Architecture
 
-This project is not just a chatbot.
-
-It is an Agentic AI workflow:
-
-EMPLOYEE
-   ↓
-AGENTS
-   ↓
-TOOLS
-   ↓
-EVIDENCE
-   ↓
-AI REASONING
-   ↓
-CONFIDENCE
-   ↓
-GUIDED SOLUTION
-   ↓
-EMPLOYEE FEEDBACK
-   ↓
-RETRY / MEMORY
-   ↓
-RESOLVED OR IT SUPPORT TICKET
-
+👤 Employee
+     │
+     ▼
+🌐 FastAPI
+     │
+     ▼
+🔄 LangGraph Workflow
+     │
+     ▼
+🗂️ Planner Agent
+     │
+     ▼
+🔍 Researcher Agent
+     │
+     ├── 📚 Knowledge Base
+     ├── 🗃️ Incident Database
+     ├── 👥 HR System
+     ├── 🏢 Infrastructure
+     ├── 📅 Calendar
+     └── 🌐 Web Search
+     │
+     ▼
+📊 Analysis Agent
+     │
+     ▼
+⚖️ Decision Agent
+     │
+     ├── ✅ Guided Resolution
+     │
+     └── 🎫 Escalation
+              │
+              ▼
+         🛠️ IT Support
+     
+     Guided Resolution
+              │
+              ▼
+        👤 Employee
+              │
+        ┌─────┴─────┐
+        ▼           ▼
+      Fixed      Not Fixed
+        │           │
+        ▼           ▼
+    ✅ Resolved   🔄 Retry
+                    │
+                    ▼
+              Alternative Steps
+                    │
+                    ▼
+                 🎫 Ticket
 
 ## 🎯 One-Line Description
 
