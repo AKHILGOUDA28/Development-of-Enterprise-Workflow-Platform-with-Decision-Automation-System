@@ -196,58 +196,7 @@ IT Support needs to be notified about an important event.
 
 ---
 
-## 🔄 Complete Agent + Tool Workflow
 
-Employee
-   ↓
-Reports Issue
-   ↓
-Planner Agent
-   ↓
-Creates Investigation Plan
-   ↓
-Researcher Agent
-   ↓
-Uses Tools
-   ├── Knowledge Base
-   ├── Incident Database
-   ├── HR System
-   ├── Infrastructure Monitor
-   ├── Calendar
-   └── Web Search
-   ↓
-Research Evidence
-   ↓
-Analysis Agent
-   ↓
-Root Cause + Severity + Confidence
-   ↓
-Decision Agent
-   ↓
- ┌──────────────────────┐
- │ Confidence >= 60%    │
- └──────────┬───────────┘
-            ↓
-     Guided Resolution
-            ↓
-      Employee Tries
-            ↓
-       ┌────┴────┐
-       ↓         ↓
-     Fixed    Not Fixed
-       ↓         ↓
-   RESOLVED    Retry
-                 ↓
-        Alternative Solution
-                 ↓
-           Still Failed?
-                 ↓
-          Ticket System
-                 ↓
-            IT Support
-
-
----
 
 ## 🧠 Example
 
@@ -392,29 +341,6 @@ can become useful historical evidence for future incidents.
 
 ---
 
-## 🔄 Closed-Loop AI
-
-The system does not simply give an answer and assume the problem is fixed.
-
-It follows:
-
-AI Investigation
-      ↓
-Solution
-      ↓
-Employee Tries
-      ↓
-Employee Feedback
-      ↓
- ┌────┴─────┐
- ↓          ↓
-Solved    Failed
- ↓          ↓
-Resolved   Retry
-             ↓
-      Alternative Solution
-             ↓
-          Ticket
 
 
 ---
@@ -492,58 +418,6 @@ Gmail SMTP
 
 Observability:
 Agent Bus + LangSmith
-
-Deployment:
-Docker
-
-
----
-
-## 📁 Main Project Structure
-
-AI-Agent-Coordination-Decision-Engine/
-│
-├── api.py
-├── workflow.py
-├── agent_bus.py
-├── memory.py
-│
-├── agents/
-│   ├── planner.py
-│   ├── researcher.py
-│   ├── analysis.py
-│   ├── decision.py
-│   └── executor.py
-│
-├── tools/
-│   ├── base_tool.py
-│   ├── registry.py
-│   ├── knowledge_tool.py
-│   ├── database_tool.py
-│   ├── hr_tool.py
-│   ├── calendar_tool.py
-│   ├── web_search_tool.py
-│   ├── infrastructure_tool.py
-│   ├── ticket_tool.py
-│   ├── email_tool.py
-│   └── notification_tool.py
-│
-├── database/
-│   ├── connection.py
-│   ├── seed.py
-│   └── knowledge_base.json
-│
-├── services/
-│   ├── policy_engine.py
-│   └── audit_service.py
-│
-├── interface.html
-├── requirements.txt
-├── Dockerfile
-├── LICENSE
-└── README.md
-
-
 ---
 
 ## 🚀 Quick Start
