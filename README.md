@@ -1,277 +1,645 @@
-# AI IT Operations Command Center
+# 🤖 AI Agent Coordination & Decision Engine
 
-> **An AI-powered IT Incident Triage and Workflow Automation Platform** that uses coordinated LLM agents, enterprise tools, persistent memory, and policy-controlled actions to investigate, resolve, or escalate IT incidents automatically.
-
----
-
-## 📺 Live Dashboard
-
-**http://localhost:8000**
-
-| Credential | Username | Password | Role |
-|-----------|----------|----------|------|
-| Employee | `emp1024` | `password123` | Submit & view own incidents |
-| IT Support | `itsupport` | `support123` | Manage incidents & tickets |
-| Admin | `admin` | `admin123` | Full access + HITL approvals |
+An Agentic AI platform that automatically investigates employee IT issues,
+uses enterprise tools to find solutions, gives guided troubleshooting steps,
+and raises a support ticket when the issue cannot be solved.
 
 ---
 
-## 🏗️ Architecture
+## 🎯 How It Works
 
-```
+Employee reports an IT issue
+        ↓
+Planner Agent
+        ↓
+Researcher Agent
+        ↓
+Uses Enterprise Tools
+        ↓
+Analysis Agent
+        ↓
+Root Cause + Confidence Score
+        ↓
+Decision Agent
+        ↓
+ ┌───────────────┬────────────────┐
+ │               │                │
+Solvable      Not Solvable       │
+ │               │                │
+ ↓               ↓                │
+Guided         Ticket             │
+Solution       Raised             │
+ │               ↓                │
+ ↓           IT Support           │
+Employee                          │
+tries steps                       │
+ │                                 │
+ ├── Solved → RESOLVED             │
+ │                                 │
+ └── Not Solved → Retry            │
+                    ↓
+              Alternative Steps
+                    ↓
+              Still Not Solved
+                    ↓
+                IT Support
+
+
+---
+
+## 🤖 AI Agents
+
+### 1. Planner Agent
+Reads the employee issue and creates an investigation plan.
+
+Example:
+"VPN is disconnecting"
+
+Plan:
+- Search known VPN solutions
+- Check similar incidents
+- Check infrastructure
+- Check maintenance
+- Find the best resolution
+
+### 2. Researcher Agent
+Uses tools to collect evidence.
+
+It decides which tools are useful and gathers information for the
+Analysis Agent.
+
+### 3. Analysis Agent
+Analyzes the collected evidence.
+
+It determines:
+- Root cause
+- Issue category
+- Severity
+- Confidence score
+- Recommended solution
+
+Example:
+
+Root Cause: VPN client configuration problem
+Confidence: 88%
+Solvable: Yes
+
+### 4. Decision Agent
+Decides what should happen next.
+
+Confidence >= 60%
+        ↓
+Guided Resolution
+
+Confidence < 60%
+        ↓
+Create IT Support Ticket
+
+### 5. Executor Agent
+Finalizes the result and prepares the response shown to the employee
+or IT Support.
+
+
+---
+
+## 🔧 9 Enterprise Tools
+
+### 1. Knowledge Base
+Searches structured IT troubleshooting knowledge.
+
+Used when:
+The AI needs known solutions and step-by-step instructions.
+
+### 2. Incident Database
+Searches previous incidents.
+
+Used when:
+The AI wants to know whether similar issues were solved before.
+
+### 3. HR System
+Provides employee and department information.
+
+Used when:
+Employee or organizational information is required.
+
+### 4. Infrastructure Monitor
+Checks simulated infrastructure/server health.
+
+Used when:
+The issue may be caused by VPN, server, network, or infrastructure problems.
+
+### 5. Calendar System
+Checks maintenance windows and blackout periods.
+
+Used when:
+The issue may be caused by planned maintenance.
+
+### 6. Web Search
+Provides additional technical information.
+
+Used when:
+The internal Knowledge Base does not contain enough information.
+
+### 7. Email
+Sends resolution instructions and status messages.
+
+Used when:
+The employee needs instructions or an incident update.
+
+### 8. Ticket System
+Creates an IT Support ticket.
+
+Used when:
+The AI cannot confidently solve the issue or troubleshooting attempts fail.
+
+### 9. Notification
+Creates internal dashboard notifications.
+
+Used when:
+IT Support needs to be notified about an important event.
+
+
+---
+
+## 🔄 Complete Agent + Tool Workflow
+
 Employee
    ↓
-Incident API (FastAPI)
+Reports Issue
    ↓
-LangGraph Orchestrator
+Planner Agent
    ↓
-┌──────────┬──────────┬──────────┐
-│ Planner  │Researcher│ Analysis │
-│  Agent   │  Agent   │  Agent   │
-└──────────┴──────────┴──────────┘
-      ↓ Tool Registry ↓
- KB · Incidents · HR · Calendar
- Web Search · Infra · Ticket
- Email · Notification
+Creates Investigation Plan
    ↓
-Decision Agent → Policy Engine
+Researcher Agent
    ↓
-┌──────────────┬───────────────┐
-│  Auto-Resolve│   Escalate    │
-│  (email sent)│ (ticket + HITL)│
-└──────────────┴───────────────┘
+Uses Tools
+   ├── Knowledge Base
+   ├── Incident Database
+   ├── HR System
+   ├── Infrastructure Monitor
+   ├── Calendar
+   └── Web Search
    ↓
-Executor Agent
+Research Evidence
    ↓
-Dashboard · Notifications · Audit Log
-```
+Analysis Agent
+   ↓
+Root Cause + Severity + Confidence
+   ↓
+Decision Agent
+   ↓
+ ┌──────────────────────┐
+ │ Confidence >= 60%    │
+ └──────────┬───────────┘
+            ↓
+     Guided Resolution
+            ↓
+      Employee Tries
+            ↓
+       ┌────┴────┐
+       ↓         ↓
+     Fixed    Not Fixed
+       ↓         ↓
+   RESOLVED    Retry
+                 ↓
+        Alternative Solution
+                 ↓
+           Still Failed?
+                 ↓
+          Ticket System
+                 ↓
+            IT Support
+
 
 ---
 
-## 🤖 Five Agents
+## 🧠 Example
 
-| Agent | Responsibility |
-|-------|---------------|
-| **Planner** | Breaks incident into structured investigation plan |
-| **Researcher** | Calls enterprise tools to gather evidence |
-| **Analysis** | Determines root cause, severity, confidence score |
-| **Decision** | Policy-controlled routing: Auto-Fix / HITL / Escalate |
-| **Executor** | Finalizes resolution, sends notifications |
+Employee reports:
+
+"My Outlook is disconnected and I cannot send or receive emails."
+
+### Planner Agent
+Creates an investigation plan.
+
+### Researcher Agent
+Uses:
+
+Knowledge Base
+→ Finds Outlook troubleshooting steps
+
+Incident Database
+→ Finds similar solved incidents
+
+Infrastructure Monitor
+→ Checks whether Outlook/email services are healthy
+
+Calendar
+→ Checks for planned maintenance
+
+### Analysis Agent
+
+Example result:
+
+Root Cause:
+Outlook authentication/session issue
+
+Confidence:
+88%
+
+Solvable:
+Yes
+
+### Decision Agent
+
+Because confidence is high:
+
+→ Guided Resolution
+
+Employee receives:
+
+1. Close Outlook
+2. Sign out of the account
+3. Reopen Outlook
+4. Sign in again
+5. Test Send/Receive
+
+### Employee Response
+
+If employee selects:
+
+"Yes, It's Fixed"
+
+→ Incident becomes RESOLVED
+→ Successful resolution can be stored in memory
+
+If employee selects:
+
+"Still Not Working"
+
+→ System investigates again
+→ Finds an alternative solution
+
+If the alternative also fails:
+
+→ Ticket is created
+→ IT Support receives the complete history
+
 
 ---
 
-## 🔧 Nine Tools
+## 🎫 Intelligent Ticket Escalation
 
-| Tool | Purpose |
-|------|---------|
-| Knowledge Base | Searches 100 approved IT resolution articles |
-| Incident Database | Finds similar historical incidents |
-| HR System | Looks up employee profiles, departments |
-| Calendar | Checks maintenance windows & blackout periods |
-| Web Search | External technical information |
-| Infrastructure | Simulated infrastructure monitoring connector |
-| Ticket System | Creates IT support tickets (INC-XXXXX) |
-| Email | Sends resolution instructions via Gmail SMTP |
-| Notification | Dashboard alerts & system notifications |
+The ticket contains more than just the original issue.
+
+Example:
+
+Ticket: TKT-10452
+
+Employee Issue:
+Outlook disconnected
+
+AI Diagnosis:
+Authentication/session problem
+
+Confidence:
+84%
+
+Attempt 1:
+Re-authentication
+
+Result:
+Failed
+
+Attempt 2:
+Outlook profile troubleshooting
+
+Result:
+Failed
+
+Reason for Escalation:
+Guided troubleshooting attempts failed.
+
+This allows IT Support to continue from the point where the AI stopped.
 
 
+---
 
-## 🗄️ Database Schema
+## 🧠 Knowledge Base
 
-| Table | Rows (seeded) | Purpose |
-|-------|--------------|---------|
-| `departments` | 10 | Company departments |
-| `employees` | 100 | Extended HR profiles |
-| `users` | 100+ | Authentication |
-| `incidents` | 500+ | Historical incidents |
-| `tickets` | 100+ | IT support tickets |
-| `knowledge_articles` | 100 | Resolution knowledge base |
-| `audit_logs` | 200+ | Complete action trail |
-| `agent_events` | 500+ | Agent lifecycle events |
-| `tool_executions` | — | Tool monitoring data |
-| `notifications` | 80+ | Email/dashboard notifications |
-| `long_term_memory` | 30+ | AI verified patterns |
-| `workflow_results` | — | Workflow output records |
+The Knowledge Base contains structured IT resolution data.
 
-Supports **SQLite** (local dev) and **Supabase PostgreSQL** (production) — auto-detected via `DATABASE_URL`.
+Each article can contain:
+
+- Issue
+- Symptoms
+- Possible Causes
+- Resolution Steps
+- Success Rate
+- Confidence History
+- Verified Resolution Data
+
+Example:
+
+Issue:
+VPN disconnecting
+
+Steps:
+1. Restart VPN client
+2. Sign in again
+3. Reconnect VPN
+4. Test connection
+
+If employees successfully solve the issue, that successful resolution
+can become useful historical evidence for future incidents.
+
+
+---
+
+## 🔄 Closed-Loop AI
+
+The system does not simply give an answer and assume the problem is fixed.
+
+It follows:
+
+AI Investigation
+      ↓
+Solution
+      ↓
+Employee Tries
+      ↓
+Employee Feedback
+      ↓
+ ┌────┴─────┐
+ ↓          ↓
+Solved    Failed
+ ↓          ↓
+Resolved   Retry
+             ↓
+      Alternative Solution
+             ↓
+          Ticket
+
+
+---
+
+## 👥 Users
+
+### Employee
+- Reports IT issues
+- Receives guided solutions
+- Tries troubleshooting steps
+- Confirms whether it worked
+- Retries or raises a ticket
+
+### IT Support
+- Receives escalated tickets
+- Reviews AI investigation
+- Sees attempted solutions
+- Resolves unresolved issues
+- Updates incident status
+
+### Admin
+- Manages users
+- Monitors agents
+- Monitors tools
+- Views logs and analytics
+- Monitors overall platform
+
+
+---
+
+## 🗄️ Data Stored
+
+The system stores:
+
+- Employee information
+- Incidents
+- Historical incidents
+- Knowledge articles
+- Tickets
+- Agent events
+- Tool executions
+- Audit logs
+- Notifications
+- Verified resolution memory
+- Workflow results
+
+Development:
+SQLite
+
+Production:
+PostgreSQL / Supabase
+
+
+---
+
+## 🛠️ Technology Stack
+
+LLM:
+Llama 3.3 70B via Groq
+
+AI:
+LangChain + LangGraph
+
+Backend:
+FastAPI + Python
+
+Database:
+SQLite / PostgreSQL
+
+Authentication:
+JWT + RBAC
+
+Email:
+Gmail SMTP
+
+Observability:
+Agent Bus + LangSmith
+
+Deployment:
+Docker
+
+
+---
+
+## 📁 Main Project Structure
+
+AI-Agent-Coordination-Decision-Engine/
+│
+├── api.py
+├── workflow.py
+├── agent_bus.py
+├── memory.py
+│
+├── agents/
+│   ├── planner.py
+│   ├── researcher.py
+│   ├── analysis.py
+│   ├── decision.py
+│   └── executor.py
+│
+├── tools/
+│   ├── base_tool.py
+│   ├── registry.py
+│   ├── knowledge_tool.py
+│   ├── database_tool.py
+│   ├── hr_tool.py
+│   ├── calendar_tool.py
+│   ├── web_search_tool.py
+│   ├── infrastructure_tool.py
+│   ├── ticket_tool.py
+│   ├── email_tool.py
+│   └── notification_tool.py
+│
+├── database/
+│   ├── connection.py
+│   ├── seed.py
+│   └── knowledge_base.json
+│
+├── services/
+│   ├── policy_engine.py
+│   └── audit_service.py
+│
+├── interface.html
+├── requirements.txt
+├── Dockerfile
+├── LICENSE
+└── README.md
+
 
 ---
 
 ## 🚀 Quick Start
 
-### 1. Clone & Setup
-```bash
+### Clone
+
 git clone https://github.com/AKHILGOUDA28/AI-Agent-Coordination-Decision-Engine.git
+
 cd AI-Agent-Coordination-Decision-Engine
+
+### Create Environment
+
 python -m venv venv
-venv\Scripts\activate        # Windows
-# source venv/bin/activate   # macOS/Linux
+
+### Windows
+
+venv\Scripts\activate
+
+### Install Packages
+
 pip install -r requirements.txt
-```
 
-### 2. Configure Environment
-```bash
-# Copy and edit .env
-cp .env.example .env
-```
+### Configure .env
 
-Edit `.env`:
-```env
-GROQ_API_KEY=gsk_your_key_here
+Add:
+
+GROQ_API_KEY=your_api_key
 MODEL_NAME=llama-3.3-70b-versatile
-DATABASE_URL=postgresql://user:pass@host:port/db  # optional; falls back to SQLite
-DIRECT_URL=postgresql://...                         # for DDL migrations
-JWT_SECRET_KEY=your-secret-key
-EMAIL_USER=your@gmail.com
-EMAIL_PASSWORD=your-app-password
-ALLOWED_ORIGINS=*
-```
+JWT_SECRET_KEY=your_secret_key
 
-### 3. Seed Production Data
-```bash
+### Seed Database
+
 python database/seed.py
-# Optional: reset all data first
-python database/seed.py --reset
-```
 
-### 4. Start Server
-```bash
+### Start Application
+
 python api.py
-# or
-uvicorn api:app --host 0.0.0.0 --port 8000 --reload
-```
 
-### 5. Open Dashboard
-Navigate to **http://localhost:8000** and log in.
+Open:
 
+http://localhost:8000
 
-## 📊 API Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/auth/login` | JWT login |
-| `POST` | `/ask` | Submit incident → full workflow |
-| `GET` | `/incidents` | List incidents (filterable) |
-| `GET` | `/incidents/{id}` | Incident detail + audit trail |
-| `PUT` | `/incidents/{id}/status` | Update status (IT Support+) |
-| `POST` | `/incidents/{id}/approve` | HITL approve (Admin+) |
-| `POST` | `/incidents/{id}/reject` | HITL reject (Admin+) |
-| `GET` | `/analytics/summary` | KPI dashboard data |
-| `GET` | `/analytics/trends` | 30-day incident trend |
-| `GET` | `/analytics/agent-performance` | Agent timing stats |
-| `GET` | `/employees` | Employee list (IT Support+) |
-| `GET` | `/departments` | Department list |
-| `GET` | `/knowledge` | Knowledge base (filterable) |
-| `GET` | `/audit-logs` | Paginated audit trail |
-| `GET` | `/policy/table` | Full policy rule table |
-| `POST` | `/policy/evaluate` | Test a policy decision |
-| `GET` | `/tools/stats` | Tool health metrics |
-| `GET` | `/tools/executions` | Tool execution history |
-| `GET` | `/notifications` | Recent notifications |
-| `GET` | `/memory` | AI long-term memory |
-| `GET` | `/observability/metrics` | System observability |
-| `GET` | `/health` | Health check |
-| `GET` | `/docs` | Interactive API docs (Swagger) |
 
 ---
 
-## 📋 Testing
+## 🔌 Important API
 
-```bash
-# Unit tests
-python -m pytest tests/ -v
+POST /auth/login
+→ Login
 
-# Policy engine smoke test
-python services/policy_engine.py
+POST /ask
+→ Submit IT issue and start AI workflow
 
-# Seed script dry run
-python database/seed.py --reset
-```
+GET /incidents
+→ View incidents
+
+GET /incidents/{id}
+→ View incident details
+
+GET /knowledge
+→ View Knowledge Base
+
+GET /tools/stats
+→ Tool statistics
+
+GET /tools/executions
+→ Tool execution history
+
+GET /memory
+→ AI resolution memory
+
+GET /audit-logs
+→ Audit history
+
+GET /observability/metrics
+→ System metrics
+
+GET /health
+→ System health
+
+GET /docs
+→ Swagger API documentation
+
 
 ---
 
-## 🔒 Security Features
+## 🧪 Testing
 
-- **JWT Authentication** — 24-hour tokens, HS256
-- **RBAC** — Employee / IT Support / Admin roles
-- **Rate Limiting** — Sliding window, 60 req/min per IP
-- **Policy Engine** — Hard rules between AI and tool execution
-- **Audit Logging** — Every action recorded with actor, timestamp, payload
-- **HITL** — High-risk actions always require human approval
-- **Environment variables** — No secrets in source code
+Run:
 
----
+pytest -v
 
-## 🌐 Deployment
+The project tests:
 
-| Component | Recommended Platform |
-|-----------|---------------------|
-| Frontend (dashboard) | Serve via FastAPI static / Vercel |
-| Backend API | Render / Railway / Fly.io / Docker |
-| Database | Supabase PostgreSQL |
-| LLM | Groq API (Llama 3.3 70B) |
-| Email | Gmail SMTP / Microsoft Graph |
+- Agents
+- Tools
+- Database
+- Policy Engine
+- Workflow
+- Failure handling
+
 
 ---
 
-## 📁 Project Structure
+## ⭐ Main Idea
 
-```
-AI-Agent-Coordination/
-├── api.py                  # FastAPI REST API (all endpoints)
-├── workflow.py             # LangGraph workflow orchestrator
-├── agent_bus.py            # Event bus for agent coordination
-├── auth.py                 # JWT + RBAC
-├── config.py               # LLM + environment config
-├── prompts.py              # LangChain prompt templates
-├── memory.py               # Long-term memory manager
-├── tracing.py              # LangSmith tracer wrapper
-├── benchmark.py            # Evaluation benchmark suite
-├── performance_test.py     # Concurrent load testing
-│
-├── agents/
-│   ├── planner.py          # Planner Agent
-│   ├── researcher.py       # Researcher Agent
-│   ├── analysis.py         # Analysis Agent
-│   ├── decision.py         # Decision Agent
-│   └── executor.py         # Executor Agent
-│
-├── tools/
-│   ├── base_tool.py        # Base tool class (timeout, retry, backoff)
-│   ├── registry.py         # Tool registry + stats
-│   ├── knowledge_tool.py   # KB search
-│   ├── database_tool.py    # Historical incident search
-│   ├── hr_tool.py          # Employee/department lookup
-│   ├── calendar_tool.py    # Maintenance window check
-│   ├── web_search_tool.py  # External tech search
-│   ├── weather_tool.py     # Infrastructure monitoring (simulated)
-│   ├── ticket_tool.py      # Ticket creation
-│   ├── email_tool.py       # Email notification
-│   └── notification_tool.py# Dashboard notification
-│
-├── database/
-│   ├── connection.py       # SQLite + PostgreSQL manager
-│   ├── init_db.py          # Schema creation + bootstrap seed
-│   └── seed.py             # Production seed (500 incidents, 100 KB articles…)
-│
-├── services/
-│   ├── policy_engine.py    # Enterprise action policy table
-│   └── audit_service.py    # Centralized audit logging service
-│
-├── interface.html          # AI IT Operations Command Center (production dashboard)
-├── analysis.html           # Analytics deep-dive page
-│
-├── tests/
-│   ├── test_agents.py
-│   ├── test_tools.py
-│   ├── test_database.py
-│   ├── test_policy.py
-│   └── test_workflow.py
-│
-├── Dockerfile              # Multi-stage production Docker build
-├── requirements.txt
-├── .env                    # Secrets (never commit)
-├── .gitignore
-└── README.md
-```
+This project is not just a chatbot.
 
+It is an Agentic AI workflow:
+
+EMPLOYEE
+   ↓
+AGENTS
+   ↓
+TOOLS
+   ↓
+EVIDENCE
+   ↓
+AI REASONING
+   ↓
+CONFIDENCE
+   ↓
+GUIDED SOLUTION
+   ↓
+EMPLOYEE FEEDBACK
+   ↓
+RETRY / MEMORY
+   ↓
+RESOLVED OR IT SUPPORT TICKET
+
+
+## 🎯 One-Line Description
+
+An Agentic AI IT incident platform where coordinated AI agents use enterprise tools and historical knowledge to investigate employee issues, provide guided solutions, learn from feedback, and escalate unresolved problems to IT Support.
